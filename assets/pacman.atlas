@@ -1,0 +1,104 @@
+
+pacman.png
+size: 128, 32
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+pacman_acute
+  rotate: false
+  xy: 20, 13
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
+pacman_death
+  rotate: false
+  xy: 2, 12
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 11
+pacman_death
+  rotate: false
+  xy: 2, 2
+  size: 15, 8
+  orig: 15, 8
+  offset: 0, 0
+  index: 2
+pacman_death
+  rotate: false
+  xy: 71, 19
+  size: 13, 9
+  orig: 13, 9
+  offset: 0, 0
+  index: 1
+pacman_death
+  rotate: false
+  xy: 86, 22
+  size: 15, 6
+  orig: 15, 6
+  offset: 0, 0
+  index: 3
+pacman_death
+  rotate: false
+  xy: 103, 22
+  size: 15, 6
+  orig: 15, 6
+  offset: 0, 0
+  index: 6
+pacman_death
+  rotate: false
+  xy: 71, 12
+  size: 15, 5
+  orig: 15, 5
+  offset: 0, 0
+  index: 4
+pacman_death
+  rotate: false
+  xy: 88, 15
+  size: 15, 5
+  orig: 15, 5
+  offset: 0, 0
+  index: 5
+pacman_death
+  rotate: false
+  xy: 105, 13
+  size: 13, 7
+  orig: 13, 7
+  offset: 0, 0
+  index: 7
+pacman_death
+  rotate: false
+  xy: 120, 21
+  size: 5, 7
+  orig: 5, 7
+  offset: 0, 0
+  index: 9
+pacman_death
+  rotate: false
+  xy: 88, 6
+  size: 9, 7
+  orig: 9, 7
+  offset: 0, 0
+  index: 8
+pacman_death
+  rotate: false
+  xy: 120, 13
+  size: 1, 6
+  orig: 1, 6
+  offset: 0, 0
+  index: 10
+pacman_ninety
+  rotate: false
+  xy: 37, 13
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
+pacman_whole
+  rotate: false
+  xy: 54, 13
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
