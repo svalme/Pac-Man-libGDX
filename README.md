@@ -4,6 +4,13 @@ A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://git
 
 This project was generated with a template including simple application launchers and a main class extending `Game` that sets the first screen.
 
+## Progress
+
+- Title screen and maze screen created.
+- Character sprites added.
+- Next steps: work on ghost sprite chase behavior.
+- Progress currently paused on this project.
+
 ## Platforms
 
 - `core`: Main module with the application logic shared by all platforms.
