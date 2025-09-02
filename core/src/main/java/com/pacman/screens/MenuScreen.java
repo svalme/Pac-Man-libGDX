@@ -1,6 +1,8 @@
 package com.pacman.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -13,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.pacman.test.DebugPathfindingScreen;
+import com.badlogic.gdx.Input.Keys;
+
 
 /** First screen of the application. Displayed after the application is created. */
 
@@ -82,7 +86,7 @@ public class MenuScreen implements Screen {
         scores_button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new DebugPathfindingScreen()); // Navigate to the GameScreen
+                //game.setScreen(); // Navigate to the GameScreen
             }
         });
 
@@ -106,6 +110,22 @@ public class MenuScreen implements Screen {
             }
         });
 
+
+        // Set the input processor to handle key events
+        Gdx.input.setInputProcessor(new InputAdapter() {
+            @Override
+            public boolean keyUp(int keycode) {
+                // Check if the released key was F1
+                if (keycode == Input.Keys.F1) {
+                    // Toggle the debug mode flag
+                    //isDebugMode = !isDebugMode;
+                    //Gdx.app.log("F1Toggle", "Debug mode toggled: " + isDebugMode);
+                    game.setScreen(new DebugPathfindingScreen());
+                    return true; // The event was handled
+                }
+                return false; // The event was not handled
+            }
+        });
 
 
 
