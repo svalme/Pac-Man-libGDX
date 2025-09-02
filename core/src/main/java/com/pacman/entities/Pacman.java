@@ -11,10 +11,11 @@ import com.badlogic.gdx.math.Circle;
 
 public class Pacman {
 
-    private float x, y; // center position of Pacman
+    private float centerX, centerY; // center position of Pacman
     private float radius; // radius of Pacman's collision circle
     private float stateTime; // animation state time
     private final float speed = 650f / 5f; // set speed to 1/5th of the screen width
+    private final int pacmanTileSize = 15;
 
     private int lives; // pacman lives
 
@@ -26,9 +27,9 @@ public class Pacman {
     private Map map;
 
     public Pacman(Map map) {
-        // default position
-        this.x = map.getTileCenterX(13);
-        this.y = map.getTileCenterY(23);
+        // default position: place pacman at the center of tile (13, 23)
+        this.centerX = map.getTileCenterX(13);
+        this.centerY = map.getTileCenterY(23);
         this.radius = 6;
 
         this.map = map;
@@ -44,15 +45,15 @@ public class Pacman {
     }
 
     public float getCenterX() {
-        return x;
+        return centerX;
     }
 
     public float getCenterY() {
-        return y;
+        return centerY;
     }
 
     public Circle getCollisionCircle() {
-        return new Circle(x, y, radius);
+        return new Circle(centerX, centerY, radius);
     }
 
     public void setDirection(Direction newDirection) {
@@ -60,14 +61,14 @@ public class Pacman {
     }
 
     public void setPosition(int row, int column) {
-        this.x = map.getTileCenterX(column);
-        this.y = map.getTileCenterY(row);
+        this.centerX = map.getTileCenterX(column);
+        this.centerY = map.getTileCenterY(row);
     }
 
     public void update(float deltaTime) {
         // update position based on direction and speed
-        float targetX = x;
-        float targetY = y;
+        float targetX = centerX;
+        float targetY = centerY;
 
         switch (direction) {
             case Direction.UP:
@@ -87,15 +88,15 @@ public class Pacman {
         // collision check with the map
         if (!map.collisionFree(targetX, targetY, radius, direction)) {
            // System.out.printf("collision free: x: %f, y: %f\n", targetX, targetY);
-            x = targetX;
-            y = targetY;
+            centerX = targetX;
+            centerY = targetY;
         }
 
         // enter through side tunnel
-        if (x < 0) {
-            x = map.map[0].length * map.TILE_SIZE - map.TILE_SIZE / 2; // wrap to the right
-        } else if (x >= map.map[0].length * map.TILE_SIZE) {
-            x = map.TILE_SIZE / 2; // wrap to the left
+        if (centerX < 0) {
+            centerX = map.map[0].length * Map.TILE_SIZE - Map.TILE_SIZE / 2; // wrap to the right
+        } else if (centerX >= map.map[0].length * Map.TILE_SIZE) {
+            centerX = Map.TILE_SIZE / 2; // wrap to the left
         }
 
         updatePacmanAnimationState(deltaTime);
@@ -131,14 +132,14 @@ public class Pacman {
                 break;
         }
 
-        float offsetX = 15 / 2f;  // offset from center to bottom-left corner
-        float offsetY = 15 / 2f;
+        float offsetX = pacmanTileSize / 2f;  // offset from center to bottom-left corner
+        float offsetY = pacmanTileSize / 2f;
 
         // adjust the position based on the center
-        float drawX = x - offsetX;
-        float drawY = y - offsetY;
+        float drawX = centerX - offsetX;
+        float drawY = centerY - offsetY;
 
-        batch.draw(currentFrame, drawX, drawY, offsetX, offsetY, 15, 15, 1, 1, rotationAngle);
+        batch.draw(currentFrame, drawX, drawY, offsetX, offsetY, pacmanTileSize, pacmanTileSize, 1, 1, rotationAngle);
     }
 
     private void ghostCollision() {
@@ -148,14 +149,29 @@ public class Pacman {
 
     private void resetPacmanPosition() {
         // reset Pac-Man to the starting position
-        x = map.getTileCenterX(13);
-        y = map.getTileCenterY(23);
+        centerX = map.getTileCenterX(13);
+        centerY = map.getTileCenterY(23);
     }
 
-    public Vector2 getPacmanTilePosition(float centerX, float centerY, int tileSize) {
+    public Vector2 getPacmanTilePosition() {
         // convert pixel coordinates to tile coordinates
-        float tileX = centerX / tileSize;
-        float tileY = centerY / tileSize;
+        int tileX = (int) Math.floor((centerX - (pacmanTileSize / 2.0f)) / Map.TILE_SIZE);
+        int tileY = (int) Math.floor((centerY - (pacmanTileSize / 2.0f)) / Map.TILE_SIZE);
+
+     //   float tileX = centerX / pacman_Tile_Size;
+      //  float tileY = centerY / pacman_Tile_Size;
+
+        if (tileY < Map.columns - 1 && tileX < Map.rows - 1) {
+            System.out.println("Tile: " + map.map[(int) tileY][(int) tileX]);
+        }
+
+        if (tileX >= Map.rows) {
+            System.out.println("x out of bounds: " + tileX);
+        }
+
+        if (tileY >= Map.columns) {
+            System.out.println("Y out of bounds: " + tileY);
+        }
 
         // Vector2 for Pacman's position
         return new Vector2(tileX, tileY);

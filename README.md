@@ -9,7 +9,6 @@ This project was generated with a template including simple application launcher
 - Title screen and maze screen created.
 - Character sprites added.
 - Next steps: work on ghost sprite chase behavior.
-- Progress currently paused on this project.
 
 ## Platforms
 

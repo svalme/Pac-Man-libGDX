@@ -40,7 +40,7 @@ public class Ghost {
 
     public Ghost(Vector2 position, Texture texture, int[][] map) {
         this.position = position;
-        this.state = GhostState.SCATTER;  // Default state
+        this.state = CHASE;  // Default state
         this.map = map;
         this.pathManager = new PathManager(map);
 
@@ -60,6 +60,7 @@ public class Ghost {
 
     // make sure we don't do the next step in the path unless we've fully crossed to this tile
     public void updateTarget(Vector2 pacmanPosition, float deltaTime) {
+        //System.out.println("Ghost state: " + this.state);
         switch (state) {
             case CHASE:
                 target = pacmanPosition;

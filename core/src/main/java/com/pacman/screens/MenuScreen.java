@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.pacman.test.DebugPathfindingScreen;
 
 /** First screen of the application. Displayed after the application is created. */
 
@@ -81,7 +82,7 @@ public class MenuScreen implements Screen {
         scores_button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //game.setScreen(new GameScreen(game)); // Navigate to the GameScreen
+                game.setScreen(new DebugPathfindingScreen()); // Navigate to the GameScreen
             }
         });
 

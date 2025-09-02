@@ -19,6 +19,8 @@ public class PathManager {
     // get a new path
     public void updatePath(Vector2 position, Vector2 target) {
         if (isPathEmpty() || !target.equals(lastTarget)) {
+            System.out.println("In PathManager.updatePath(): Proceeding with new target");
+            System.out.println("Target. x: " + target.x + ", y: " + target.y);
             lastTarget = target;
             path = pathfinding.aStarPathfinding(position, target, map);
         }

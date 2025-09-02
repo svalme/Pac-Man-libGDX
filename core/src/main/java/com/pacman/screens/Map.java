@@ -14,8 +14,8 @@ public class Map {
     private TextureRegion[] tileRegions;
     public int[][] map;
     public static final int TILE_SIZE = 24; // tile size
-    private int columns = 28;
-    private int rows = 31;
+    public static int columns = 28;
+    public static int rows = 31;
     public Map() {
 
         atlas = new TextureAtlas("map.atlas");
@@ -135,14 +135,15 @@ public class Map {
         return collision; // hit empty wall or pellet
     }
 
-
+    // return the x coordinate of the center of a tile
     public float getTileCenterX(float column) {
-        return (column + 0.5f) * TILE_SIZE;
+        return (column * TILE_SIZE) + (TILE_SIZE / 2.0f);
     }
 
+    // return the y coordinate of the center of a tile
     public float getTileCenterY(float row) {
-        int flippedRow = 31 - 1 - (int)row;
-        return (flippedRow + 0.5f) * TILE_SIZE;
+        int flippedRow = rows - 1 - (int)row;
+        return (flippedRow * TILE_SIZE) + (TILE_SIZE / 2.0f);
     }
 
     public void dispose() {

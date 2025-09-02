@@ -32,4 +32,8 @@ public class Node {
         return Objects.hash(position.x, position.y);
     }
 
+    @Override
+    public String toString() {
+        return "Node{position= " + position + ", gCost= " + gCost + ", hCost= " + hCost + ", fCost= " + fCost + "}";
+    }
 }
