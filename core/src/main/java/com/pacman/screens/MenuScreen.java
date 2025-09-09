@@ -1,9 +1,6 @@
 package com.pacman.screens;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -22,13 +19,13 @@ import com.badlogic.gdx.Input.Keys;
 
 public class MenuScreen implements Screen {
 
-    final Main game;
+    final Game game;
     private Stage stage;
     private SpriteBatch batch;
     private OrthographicCamera camera;
     private ExtendViewport viewport;
 
-    public MenuScreen(final Main game) {
+    public MenuScreen(final Game game) {
         this.game = game;
 
     }
@@ -110,9 +107,7 @@ public class MenuScreen implements Screen {
             }
         });
 
-
-        // Set the input processor to handle key events
-        Gdx.input.setInputProcessor(new InputAdapter() {
+        InputProcessor debugInput = new InputAdapter() {
             @Override
             public boolean keyUp(int keycode) {
                 // Check if the released key was F1
@@ -120,12 +115,15 @@ public class MenuScreen implements Screen {
                     // Toggle the debug mode flag
                     //isDebugMode = !isDebugMode;
                     //Gdx.app.log("F1Toggle", "Debug mode toggled: " + isDebugMode);
-                    game.setScreen(new DebugPathfindingScreen());
+                    game.setScreen(new DebugPathfindingScreen(game));
                     return true; // The event was handled
                 }
                 return false; // The event was not handled
             }
-        });
+        };
+
+        InputMultiplexer multiplexer = new InputMultiplexer(stage, debugInput);
+        Gdx.input.setInputProcessor(multiplexer); // Set the input processor to handle key events
 
 
 

@@ -1,18 +1,20 @@
 package com.pacman.test;
 
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.Gdx;
 import com.pacman.entities.Pathfinding;
+import com.pacman.screens.MenuScreen;
 
 import java.util.List;
 
 public class DebugPathfindingScreen implements Screen {
+
+    private final Game game;
+
     private OrthographicCamera camera;
     private ShapeRenderer shapeRenderer;
 
@@ -24,7 +26,8 @@ public class DebugPathfindingScreen implements Screen {
 
     private final int TILE_SIZE = 32;
 
-    public DebugPathfindingScreen() {
+    public DebugPathfindingScreen(Game game) {
+        this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 640, 480);
         shapeRenderer = new ShapeRenderer();
@@ -81,6 +84,24 @@ public class DebugPathfindingScreen implements Screen {
     }
 
     private void handleInput() {
+
+        // Set the input processor to handle key events
+        Gdx.input.setInputProcessor(new InputAdapter() {
+            @Override
+            public boolean keyUp(int keycode) {
+                // Check if the released key was F1
+                if (keycode == Input.Keys.F1) {
+                    // Toggle the debug mode flag
+                    //isDebugMode = !isDebugMode;
+                    //Gdx.app.log("F1Toggle", "Debug mode toggled: " + isDebugMode);
+                    game.setScreen(new MenuScreen(game));
+                    return true; // The event was handled
+                }
+                return false; // The event was not handled
+            }
+        });
+
+
         if (Gdx.input.justTouched()) {
             int x = (int)(Gdx.input.getX() / TILE_SIZE);
             int y = (int)(Gdx.input.getY() / TILE_SIZE);
