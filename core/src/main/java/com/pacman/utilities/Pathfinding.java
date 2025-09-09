@@ -2,6 +2,7 @@ package com.pacman.utilities;
 
 import com.badlogic.gdx.math.Vector2;
 import com.pacman.screens.WallAtlasRegion;
+import com.pacman.screens.Map;
 
 
 import java.util.*;
@@ -19,7 +20,7 @@ public class Pathfinding {
         System.out.println("Start: " + start + ", Target: " + target);
 
         PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fCost));
-        Map<Vector2, Node> allNodes = new HashMap<>(); // track nodes by position
+        HashMap<Object, Object> allNodes = new HashMap<>(); // track nodes by position
 
         Node startNode = new Node(start, null, 0, heuristic(start, target));
         openSet.add(startNode);
@@ -44,7 +45,7 @@ public class Pathfinding {
                 //System.out.println("Neighbor: " + neighborPos);
                 float gCost = current.gCost + 1; // movement cost of 1 for each tile
 
-                Node neighbor = allNodes.getOrDefault(neighborPos, new Node(neighborPos, null, Float.MAX_VALUE, heuristic(neighborPos, target))); // if the neighbor node exists, get it, otherwise, create one
+                Node neighbor = (Node) allNodes.getOrDefault(neighborPos, new Node(neighborPos, null, Float.MAX_VALUE, heuristic(neighborPos, target))); // if the neighbor node exists, get it, otherwise, create one
 
                 if (gCost < neighbor.gCost) { // better path found
                     //System.out.println("Adding to a path");
