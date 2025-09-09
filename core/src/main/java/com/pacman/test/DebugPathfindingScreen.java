@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.pacman.entities.Pathfinding;
+import com.pacman.utilities.Pathfinding;
 import com.pacman.screens.MenuScreen;
 
 import java.util.List;

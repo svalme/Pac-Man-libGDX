@@ -1,4 +1,4 @@
-package com.pacman.entities;
+package com.pacman.utilities;
 
 import java.util.List;
 import com.badlogic.gdx.math.Vector2;
@@ -37,7 +37,8 @@ public class PathManager {
     }
 
     public Vector2 moveTowardsTarget(Vector2 position, float deltaTime) {
-        if (path != null && !path.isEmpty()) {
+
+        if (!isPathEmpty()) {
             Vector2 nextTile = path.get(0); // get the next tile in the path (integer coordinates)
             Vector2 direction = nextTile.cpy().sub(position).nor(); // direction to next tile
 

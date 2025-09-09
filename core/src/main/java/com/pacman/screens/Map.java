@@ -8,14 +8,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Map {
 
+    private static Map mapInstance = new Map();
 
-    //   private Texture texture;
     private TextureAtlas atlas;
     private TextureRegion[] tileRegions;
     public int[][] map;
     public static final int TILE_SIZE = 24; // tile size
     public static int columns = 28;
     public static int rows = 31;
+
     public Map() {
 
         atlas = new TextureAtlas("map.atlas");
@@ -62,10 +63,17 @@ public class Map {
 
     }
 
+    public static Map getInstance() {
+        if (mapInstance == null) {
+            mapInstance = new Map();
+        }
+        return mapInstance;
+    }
+
     public void drawMap(SpriteBatch batch) {
 
         // draw tiles from the tile map
-        for (int y = 0; y < map.length; y++) {
+        for (int y = 0; y < mapInstance.map.length; y++) {
             //System.out.printf("y: %d\n", y);
             for (int x = 0; x < map[y].length; x++) {
                 //System.out.printf("x: %d\n", x);
@@ -97,7 +105,7 @@ public class Map {
         return (tileValue != WallAtlasRegion.EMPTY.ordinal()) && (tileValue != WallAtlasRegion.PELLET_LARGE.ordinal()) && (tileValue != WallAtlasRegion.PELLET_SMALL.ordinal()); // hit empty wall or pellet
     }*/
 
-    public boolean collisionFree(float centerX, float centerY, float radius, Direction direction) {
+    public static boolean collisionFree(float centerX, float centerY, float radius, Direction direction) {
         float leadingX = centerX;
         float leadingY = centerY;
 
@@ -119,14 +127,14 @@ public class Map {
 
         // convert leading edge to tile coordinates
         int tileX = (int)(leadingX / TILE_SIZE);
-        int tileY = map.length - 1 - (int)(leadingY / TILE_SIZE);
+        int tileY = mapInstance.map.length - 1 - (int)(leadingY / TILE_SIZE);
 
         // check bounds
-        if (tileY < 0 || tileY >= map.length || tileX < 0 || tileX >= map[0].length) {
+        if (tileY < 0 || tileY >= mapInstance.map.length || tileX < 0 || tileX >= mapInstance.map[0].length) {
             return false; // Out of bounds = collision
         }
 
-        int tileValue = map[tileY][tileX];
+        int tileValue = mapInstance.map[tileY][tileX];
         //System.out.printf("tileY: %d, tileX: %d\n", tileY, tileX);
         //System.out.printf("tileValue: %d\n", tileValue);
         // check if the tile is a wall
@@ -136,12 +144,12 @@ public class Map {
     }
 
     // return the x coordinate of the center of a tile
-    public float getTileCenterX(float column) {
+    public static float getTileCenterX(float column) {
         return (column * TILE_SIZE) + (TILE_SIZE / 2.0f);
     }
 
     // return the y coordinate of the center of a tile
-    public float getTileCenterY(float row) {
+    public static float getTileCenterY(float row) {
         int flippedRow = rows - 1 - (int)row;
         return (flippedRow * TILE_SIZE) + (TILE_SIZE / 2.0f);
     }

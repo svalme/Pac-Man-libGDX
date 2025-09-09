@@ -19,20 +19,22 @@ public class Pacman {
 
     private int lives; // pacman lives
 
+    private Map mapInstance;
+
     TextureAtlas atlas;
     private TextureRegion ninetyPacman; // mouth open at ninety-degree angle
     private TextureRegion acutePacman; // mouth open at acute angle
     private TextureRegion currentFrame;
     private Direction direction;
-    private Map map;
+    //private Map map;
 
-    public Pacman(Map map) {
+    public Pacman() {
         // default position: place pacman at the center of tile (13, 23)
-        this.centerX = map.getTileCenterX(13);
-        this.centerY = map.getTileCenterY(23);
+        this.centerX = Map.getTileCenterX(13);
+        this.centerY = Map.getTileCenterY(23);
         this.radius = 6;
 
-        this.map = map;
+        //this.map = map;
         atlas = new TextureAtlas("pacman.atlas");
         ninetyPacman = atlas.findRegion("pacman_ninety");
         acutePacman = atlas.findRegion("pacman_acute");
@@ -42,6 +44,8 @@ public class Pacman {
         direction = Direction.RIGHT;
         currentFrame = acutePacman; // default to open mouth
         stateTime = 0;
+
+        mapInstance = Map.getInstance();
     }
 
     public float getCenterX() {
@@ -61,8 +65,8 @@ public class Pacman {
     }
 
     public void setPosition(int row, int column) {
-        this.centerX = map.getTileCenterX(column);
-        this.centerY = map.getTileCenterY(row);
+        this.centerX = Map.getTileCenterX(column);
+        this.centerY = Map.getTileCenterY(row);
     }
 
     public void update(float deltaTime) {
@@ -86,7 +90,7 @@ public class Pacman {
         }
 
         // collision check with the map
-        if (!map.collisionFree(targetX, targetY, radius, direction)) {
+        if (!Map.collisionFree(targetX, targetY, radius, direction)) {
            // System.out.printf("collision free: x: %f, y: %f\n", targetX, targetY);
             centerX = targetX;
             centerY = targetY;
@@ -94,8 +98,8 @@ public class Pacman {
 
         // enter through side tunnel
         if (centerX < 0) {
-            centerX = map.map[0].length * Map.TILE_SIZE - Map.TILE_SIZE / 2; // wrap to the right
-        } else if (centerX >= map.map[0].length * Map.TILE_SIZE) {
+            centerX = mapInstance.map[0].length * Map.TILE_SIZE - Map.TILE_SIZE / 2; // wrap to the right
+        } else if (centerX >= mapInstance.map[0].length * Map.TILE_SIZE) {
             centerX = Map.TILE_SIZE / 2; // wrap to the left
         }
 
@@ -149,8 +153,8 @@ public class Pacman {
 
     private void resetPacmanPosition() {
         // reset Pac-Man to the starting position
-        centerX = map.getTileCenterX(13);
-        centerY = map.getTileCenterY(23);
+        centerX = Map.getTileCenterX(13);
+        centerY = Map.getTileCenterY(23);
     }
 
     public Vector2 getPacmanTilePosition() {
@@ -162,7 +166,7 @@ public class Pacman {
       //  float tileY = centerY / pacman_Tile_Size;
 
         if (tileY < Map.columns - 1 && tileX < Map.rows - 1) {
-            System.out.println("Tile: " + map.map[(int) tileY][(int) tileX]);
+            System.out.println("Tile: " + mapInstance.map[(int) tileY][(int) tileX]);
         }
 
         if (tileX >= Map.rows) {

@@ -1,4 +1,4 @@
-package com.pacman.entities;
+package com.pacman.utilities;
 
 import com.badlogic.gdx.math.Vector2;
 

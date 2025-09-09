@@ -1,17 +1,13 @@
 package com.pacman.entities;
 
-import com.pacman.entities.PathManager;
+import com.pacman.utilities.PathManager;
 import static com.pacman.entities.GhostState.*;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.TimeUtils;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 
 public class Ghost {
@@ -64,6 +60,8 @@ public class Ghost {
         switch (state) {
             case CHASE:
                 target = pacmanPosition;
+                // target = pacman.getPacmanTilePosition()? but you need a reference to pacman
+                // maybe a coordination class that has a reference to pacman instead? then we use that class if necessary?
                 pathManager.updatePath(position, target); // A* Path to Pac-Man
                 break;
 

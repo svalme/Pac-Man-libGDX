@@ -51,9 +51,9 @@ public class GameScreen implements Screen {
         camera.update();
 
         batch = new SpriteBatch();
-        map = new Map();
+        map = Map.getInstance();
 
-        pacman = new Pacman(map);
+        pacman = new Pacman();
         ghosts = new ArrayList<>();
         ghosts.add(new Ghost(new Vector2(14, 16), new Texture("ghost_orange_soft.png"), map.map));
         for (Ghost ghost : ghosts) {
@@ -137,6 +137,6 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
-        map.dispose();
+       // map.dispose();
     }
 }
