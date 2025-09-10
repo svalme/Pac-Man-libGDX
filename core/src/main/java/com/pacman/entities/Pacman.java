@@ -158,28 +158,22 @@ public class Pacman {
     }
 
     public Vector2 getPacmanTilePosition() {
-        // convert pixel coordinates to tile coordinates
         int tileX = (int) Math.floor((centerX - (pacmanTileSize / 2.0f)) / Map.TILE_SIZE);
         int tileY = (int) Math.floor((centerY - (pacmanTileSize / 2.0f)) / Map.TILE_SIZE);
 
-     //   float tileX = centerX / pacman_Tile_Size;
-      //  float tileY = centerY / pacman_Tile_Size;
+        // flip Y if your map array is top-left based
+        int flippedY = Map.rows - 1 - tileY;
 
-        if (tileY < Map.columns - 1 && tileX < Map.rows - 1) {
-            System.out.println("Tile: " + mapInstance.map[(int) tileY][(int) tileX]);
+        if (tileX >= 0 && tileX < Map.columns &&
+            flippedY >= 0 && flippedY < Map.rows) {
+            System.out.println("Tile: " + mapInstance.map[flippedY][tileX]);
+        } else {
+            System.out.println("Out of bounds: (" + tileX + "," + flippedY + ")");
         }
 
-        if (tileX >= Map.rows) {
-            System.out.println("x out of bounds: " + tileX);
-        }
-
-        if (tileY >= Map.columns) {
-            System.out.println("Y out of bounds: " + tileY);
-        }
-
-        // Vector2 for Pacman's position
-        return new Vector2(tileX, tileY);
+        return new Vector2(tileX, tileY); // return grid position
     }
+
 
 
 }

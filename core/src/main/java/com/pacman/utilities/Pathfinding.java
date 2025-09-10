@@ -62,7 +62,9 @@ public class Pathfinding {
             }
         }
 
-        System.out.println("No Path Found");
+        System.out.println("No Path Found for Start: " + start + ", Target: " + target);
+        System.out.println("Is Start valid: " + isValidMove((int)start.x, (int) start.y, map));
+        System.out.println("Is Target valid: " + isValidMove((int)target.x, (int) target.y, map));
         return Collections.emptyList(); // no path found
     }
 
@@ -94,10 +96,11 @@ public class Pathfinding {
 
         // check if tile is walkable
         // need to check if tile is not already visited
-        int tile = map[y][x];
+        int tile = map[map.length - 1 - y][x];
+        //int tile = map[y][x];
         //System.out.println("Tile: " + tile);
 
-        return tile == WallAtlasRegion.EMPTY.ordinal() || tile == WallAtlasRegion.PELLET_SMALL.ordinal() || tile == WallAtlasRegion.PELLET_LARGE.ordinal();
+        return tile == WallAtlasRegion.EMPTY.ordinal() || tile == WallAtlasRegion.PELLET_SMALL.ordinal() || tile == WallAtlasRegion.PELLET_LARGE.ordinal() || tile == WallAtlasRegion.JAIL_DOOR.ordinal();
     }
 
     private float heuristic(Vector2 a, Vector2 b) {

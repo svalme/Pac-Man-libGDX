@@ -2,6 +2,8 @@ package com.pacman.utilities;
 
 import java.util.List;
 import com.badlogic.gdx.math.Vector2;
+import com.pacman.screens.Map;
+import com.pacman.test.PathPrinter;
 
 public class PathManager {
     private Pathfinding pathfinding;
@@ -23,6 +25,8 @@ public class PathManager {
             System.out.println("Target. x: " + target.x + ", y: " + target.y);
             lastTarget = target;
             path = pathfinding.aStarPathfinding(position, target, map);
+            Map mapInstance = Map.getInstance();
+            PathPrinter.printPath(path, mapInstance.map);
         }
     }
 
@@ -40,6 +44,7 @@ public class PathManager {
 
         if (!isPathEmpty()) {
             Vector2 nextTile = path.get(0); // get the next tile in the path (integer coordinates)
+            System.out.println("Path nextTile: " + nextTile);
             Vector2 direction = nextTile.cpy().sub(position).nor(); // direction to next tile
 
             // move towards the next tile
