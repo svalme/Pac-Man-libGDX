@@ -8,11 +8,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Map {
 
-    private static Map mapInstance = new Map();
-
     private TextureAtlas atlas;
     private TextureRegion[] tileRegions;
-    public int[][] map;
+    public static int[][] map;
     public static final int TILE_SIZE = 24; // tile size
     public static int columns = 28;
     public static int rows = 31;
@@ -62,18 +60,18 @@ public class Map {
         };
 
     }
-
+/*
     public static Map getInstance() {
         if (mapInstance == null) {
             mapInstance = new Map();
         }
         return mapInstance;
     }
-
+*/
     public void drawMap(SpriteBatch batch) {
 
         // draw tiles from the tile map
-        for (int y = 0; y < mapInstance.map.length; y++) {
+        for (int y = 0; y < map.length; y++) {
             //System.out.printf("y: %d\n", y);
             for (int x = 0; x < map[y].length; x++) {
                 //System.out.printf("x: %d\n", x);
@@ -127,14 +125,14 @@ public class Map {
 
         // convert leading edge to tile coordinates
         int tileX = (int)(leadingX / TILE_SIZE);
-        int tileY = mapInstance.map.length - 1 - (int)(leadingY / TILE_SIZE);
+        int tileY = map.length - 1 - (int)(leadingY / TILE_SIZE);
 
         // check bounds
-        if (tileY < 0 || tileY >= mapInstance.map.length || tileX < 0 || tileX >= mapInstance.map[0].length) {
+        if (tileY < 0 || tileY >= map.length || tileX < 0 || tileX >= map[0].length) {
             return false; // Out of bounds = collision
         }
 
-        int tileValue = mapInstance.map[tileY][tileX];
+        int tileValue = map[tileY][tileX];
         //System.out.printf("tileY: %d, tileX: %d\n", tileY, tileX);
         //System.out.printf("tileValue: %d\n", tileValue);
         // check if the tile is a wall

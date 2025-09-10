@@ -6,6 +6,7 @@ import com.pacman.screens.WallAtlasRegion;
 import java.util.List;
 
 public class PathPrinter {
+
     public static void printPath(List<Vector2> path, int[][] map) {
         if (path == null || path.isEmpty()) {
             System.out.println("Path is empty.");

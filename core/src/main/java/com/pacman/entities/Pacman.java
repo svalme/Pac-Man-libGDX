@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Circle;
+import com.pacman.utilities.ServiceLocator;
 
 
 public class Pacman {
@@ -45,7 +46,7 @@ public class Pacman {
         currentFrame = acutePacman; // default to open mouth
         stateTime = 0;
 
-        mapInstance = Map.getInstance();
+        mapInstance = ServiceLocator.getMapInstance();
     }
 
     public float getCenterX() {
@@ -161,7 +162,6 @@ public class Pacman {
         int tileX = (int) Math.floor((centerX - (pacmanTileSize / 2.0f)) / Map.TILE_SIZE);
         int tileY = (int) Math.floor((centerY - (pacmanTileSize / 2.0f)) / Map.TILE_SIZE);
 
-        // flip Y if your map array is top-left based
         int flippedY = Map.rows - 1 - tileY;
 
         if (tileX >= 0 && tileX < Map.columns &&

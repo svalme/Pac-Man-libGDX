@@ -15,12 +15,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.pacman.utilities.ServiceLocator;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GameScreen implements Screen {
-    private Game game;
+
     private SpriteBatch batch;
     private Map map;
     private Pacman pacman;
@@ -32,9 +33,7 @@ public class GameScreen implements Screen {
     private FitViewport viewport;
 
 
-    public GameScreen(Game game) {
-        this.game = game;
-    }
+    public GameScreen() {}
 
     @Override
     public void show() {
@@ -51,7 +50,8 @@ public class GameScreen implements Screen {
         camera.update();
 
         batch = new SpriteBatch();
-        map = Map.getInstance();
+        map = new Map();
+        ServiceLocator.registerMap(map);
 
         pacman = new Pacman();
         ghosts = new ArrayList<>();
@@ -80,10 +80,8 @@ public class GameScreen implements Screen {
 
         // start drawing
         batch.begin();
-
         map.drawMap(batch);
         pacman.render(batch);
-
 
         // draw ghosts
         for (Ghost ghost : ghosts) {
@@ -92,7 +90,7 @@ public class GameScreen implements Screen {
 
         batch.end();
 
-        // reset the batch color back to opaque (after rendering)
+        // reset the batch color to opaque (after rendering)
         batch.setColor(1f, 1f, 1f, 1f);
 
     }
@@ -108,14 +106,7 @@ public class GameScreen implements Screen {
             //ghost.interpolateMove(deltaTime);
 
         }
-/*
-        // check for collisions with the map
-        checkCollisionsWithMap();
-
-        // check for collisions between pacman and ghosts
-        checkCollisionsWithGhosts();*/
     }
-
 
     @Override
     public void resize(int width, int height) {
@@ -137,6 +128,6 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
-       // map.dispose();
+        map.dispose();
     }
 }

@@ -2,7 +2,6 @@ package com.pacman.utilities;
 
 import java.util.List;
 import com.badlogic.gdx.math.Vector2;
-import com.pacman.screens.Map;
 import com.pacman.test.PathPrinter;
 
 public class PathManager {
@@ -11,29 +10,19 @@ public class PathManager {
     private List<Vector2> path;
     private Vector2 lastTarget;
 
-    public PathManager(int[][] map) {
-        this.map = map;
+    public PathManager() {
+        this.map = ServiceLocator.getMapInstance().map;
         this.pathfinding = new Pathfinding(); // will need different paths for different ghosts
         this.lastTarget = null;
     }
 
-    // make sure we don't do the next step in the path unless we've fully crossed to this tile
     // get a new path
     public void updatePath(Vector2 position, Vector2 target) {
         if (isPathEmpty() || !target.equals(lastTarget)) {
-            System.out.println("In PathManager.updatePath(): Proceeding with new target");
-            System.out.println("Target. x: " + target.x + ", y: " + target.y);
             lastTarget = target;
-            path = pathfinding.aStarPathfinding(position, target, map);
-            Map mapInstance = Map.getInstance();
-            PathPrinter.printPath(path, mapInstance.map);
+            path = pathfinding.aStarPathfinding(position, target);
+            PathPrinter.printPath(path, map);
         }
-    }
-
-
-    // make sure we don't do the next step in the path unless we've fully crossed to this tile
-    public Vector2 getNextMove() {
-        return (path != null && path.size() > 1) ? path.get(1) : null;
     }
 
     public boolean isPathEmpty() {
@@ -43,17 +32,13 @@ public class PathManager {
     public Vector2 moveTowardsTarget(Vector2 position, float deltaTime) {
 
         if (!isPathEmpty()) {
-            Vector2 nextTile = path.get(0); // get the next tile in the path (integer coordinates)
-            System.out.println("Path nextTile: " + nextTile);
+            Vector2 nextTile = path.getFirst(); // get the next tile in the path (integer coordinates)
             Vector2 direction = nextTile.cpy().sub(position).nor(); // direction to next tile
 
-            // move towards the next tile
-            position.add(direction.scl(deltaTime * 5f));
+            position.add(direction.scl(deltaTime * 5f)); // move towards the next tile
 
-            // snap to tile once close enough
-            if (position.epsilonEquals(nextTile, 0.1f)) {
-                //position.set(nextTile); // snap to exact tile position
-                path.remove(0); // move to the next step in the path
+            if (position.epsilonEquals(nextTile, 0.1f)) { // snap to tile once close enough
+                path.removeFirst(); // move to the next step in the path
             }
 
             return position;

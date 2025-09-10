@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.pacman.utilities.Pathfinding;
 import com.pacman.screens.MenuScreen;
+import com.pacman.utilities.ServiceLocator;
 
 import java.util.List;
 
@@ -28,8 +29,8 @@ public class DebugPathfindingScreen implements Screen {
 
     private final int TILE_SIZE = 32;
 
-    public DebugPathfindingScreen(Game game) {
-        this.game = game;
+    public DebugPathfindingScreen() {
+        this.game = ServiceLocator.getGameInstance();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 640, 480);
         shapeRenderer = new ShapeRenderer();
@@ -46,7 +47,7 @@ public class DebugPathfindingScreen implements Screen {
         pathfinding = new Pathfinding();
         start = new Vector2(0, 0);
         target = new Vector2(9, 4);
-        path = pathfinding.aStarPathfinding(start, target, map);
+        path = pathfinding.aStarPathfinding(start, target);
     }
 
     @Override
@@ -57,13 +58,13 @@ public class DebugPathfindingScreen implements Screen {
         camera.update();
         shapeRenderer.setProjectionMatrix(camera.combined);
 
-        // Vertical offset to center map if smaller than world
+        // vertical offset to center map since it's smaller than world
         float mapHeight = map.length * TILE_SIZE;
         float yOffset = (camera.viewportHeight - mapHeight) / 2f;
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Draw the map
+        // draw the map
         for (int y = 0; y < map.length; y++) {
             for (int x = 0; x < map[0].length; x++) {
                 // top-left origin: Y = y * TILE_SIZE
@@ -72,7 +73,7 @@ public class DebugPathfindingScreen implements Screen {
             }
         }
 
-        // Draw the path
+        // draw the path
         if (path != null) {
             shapeRenderer.setColor(Color.RED);
             for (Vector2 step : path) {
@@ -80,13 +81,11 @@ public class DebugPathfindingScreen implements Screen {
             }
         }
 
-        // Draw start/target
+        // draw start/target
         shapeRenderer.setColor(Color.GREEN);
-       // shapeRenderer.rect(start.x * TILE_SIZE, ((int) start.y) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         shapeRenderer.rect(start.x * TILE_SIZE, yOffset + (map.length - 1 - (int) start.y) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         shapeRenderer.setColor(Color.BLUE);
         shapeRenderer.rect(target.x * TILE_SIZE, yOffset + (map.length - 1 - (int) target.y) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-        //shapeRenderer.rect(target.x * TILE_SIZE, ((int) target.y) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
         shapeRenderer.end();
     }
@@ -99,16 +98,12 @@ public class DebugPathfindingScreen implements Screen {
             public boolean keyUp(int keycode) {
                 // Check if the released key was F1
                 if (keycode == Input.Keys.F1) {
-                    // Toggle the debug mode flag
-                    //isDebugMode = !isDebugMode;
-                    //Gdx.app.log("F1Toggle", "Debug mode toggled: " + isDebugMode);
                     game.setScreen(new MenuScreen(game));
                     return true; // The event was handled
                 }
                 return false; // The event was not handled
             }
         });
-
 
         if (Gdx.input.justTouched()) {
             Vector3 worldCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
@@ -117,14 +112,14 @@ public class DebugPathfindingScreen implements Screen {
             float mapHeight = map.length * TILE_SIZE;
             float yOffset = (camera.viewportHeight - mapHeight) / 2f;
 
-            // Convert world coordinates to tile indices
+            // convert world coordinates to tile indices
             int x = (int)(worldCoords.x / TILE_SIZE);
             int y = (int)((worldCoords.y - yOffset) / TILE_SIZE);
 
-            // Flip Y to match top-left map array
+            // flip Y to match top-left map array
             y = map.length - 1 - y;
 
-            // Clamp to valid tiles
+            // clamp to valid tiles
             x = MathUtils.clamp(x, 0, map[0].length - 1);
             y = MathUtils.clamp(y, 0, map.length - 1);
 
@@ -135,7 +130,7 @@ public class DebugPathfindingScreen implements Screen {
                 target.set(x, y);
             }
 
-            path = pathfinding.aStarPathfinding(start, target, map);
+            path = pathfinding.aStarPathfinding(start, target);
         }
     }
 

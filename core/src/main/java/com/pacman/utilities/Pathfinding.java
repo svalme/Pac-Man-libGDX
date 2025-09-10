@@ -1,23 +1,23 @@
 package com.pacman.utilities;
 
 import com.badlogic.gdx.math.Vector2;
-import com.pacman.screens.WallAtlasRegion;
 import com.pacman.screens.Map;
-
+import com.pacman.screens.WallAtlasRegion;
 
 import java.util.*;
 
 public class Pathfinding {
-    private static final Vector2[] DIRECTIONS = {
+
+    private Vector2[] DIRECTIONS = {
         new Vector2(1, 0),  // right
         new Vector2(-1, 0), // left
         new Vector2(0, 1),  // down
         new Vector2(0, -1)  // up
     };
 
-    public List<Vector2> aStarPathfinding(Vector2 start, Vector2 target, int[][] map) {
+    private int[][] map = ServiceLocator.getMapInstance().map;
 
-        System.out.println("Start: " + start + ", Target: " + target);
+    public List<Vector2> aStarPathfinding(Vector2 start, Vector2 target) {
 
         PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fCost));
         HashMap<Object, Object> allNodes = new HashMap<>(); // track nodes by position
@@ -28,27 +28,17 @@ public class Pathfinding {
 
         while (!openSet.isEmpty()) {
             Node current = openSet.poll(); // get the node with lowest fCost
-            //System.out.println("Current node: " + current);
-
-            // goal reached
-            /*if (current.position.epsilonEquals(target, 0.1f)) { // assumes vectors have decimal values instead of integer values; technically, Vector2 has float coordinates
-                System.out.println("Goal attained");
-                return reconstructPath(current);
-            }*/
 
             if ((int)current.position.x == (int)target.x && (int)current.position.y == (int)target.y) { // assumes vectors have decimal values instead of integer values; technically, Vector2 has float coordinates
-                System.out.println("Goal attained");
                 return reconstructPath(current);
             }
 
-            for (Vector2 neighborPos : getNeighbors(current.position, map)) {
-                //System.out.println("Neighbor: " + neighborPos);
+            for (Vector2 neighborPos : getNeighbors(current.position)) {
                 float gCost = current.gCost + 1; // movement cost of 1 for each tile
 
                 Node neighbor = (Node) allNodes.getOrDefault(neighborPos, new Node(neighborPos, null, Float.MAX_VALUE, heuristic(neighborPos, target))); // if the neighbor node exists, get it, otherwise, create one
 
                 if (gCost < neighbor.gCost) { // better path found
-                    //System.out.println("Adding to a path");
                     neighbor.gCost = gCost;
                     neighbor.fCost = neighbor.gCost + neighbor.hCost;
                     neighbor.parent = current;
@@ -56,51 +46,43 @@ public class Pathfinding {
                     allNodes.put(neighborPos, neighbor);
                     openSet.remove(neighbor); // remove to update priority
                     openSet.add(neighbor);
-
-                    //System.out.println("Added neighbor: " + neighbor);
                 }
             }
         }
 
-        System.out.println("No Path Found for Start: " + start + ", Target: " + target);
-        System.out.println("Is Start valid: " + isValidMove((int)start.x, (int) start.y, map));
-        System.out.println("Is Target valid: " + isValidMove((int)target.x, (int) target.y, map));
         return Collections.emptyList(); // no path found
     }
 
-    public List<Vector2> getNeighbors(Vector2 position, int[][] map) {
+    public List<Vector2> getNeighbors(Vector2 position) {
         List<Vector2> neighbors = new ArrayList<>();
         int x = (int) position.x;
         int y = (int) position.y;
 
-        // checking all 4 possible directions
-        for (Vector2 dir : DIRECTIONS) {
+        for (Vector2 dir : DIRECTIONS) { // checking all 4 possible directions
             int newX = x + (int)dir.x;
             int newY = y + (int)dir.y;
 
-            if (isValidMove(newX, newY, map)) {
-                //System.out.println("Valid move. X: " + newX + " Y: " + newY);
+            if (isValidMove(newX, newY)) {
                 neighbors.add(new Vector2(newX, newY));
             }
         }
 
-        //System.out.println("From getNeighbors(): " + neighbors);
         return neighbors;
     }
 
-    private boolean isValidMove(int x, int y, int[][] map) {
-        // check bounds
-        if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
+    private boolean isValidMove(int x, int y) {
+
+        if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) { // check bounds
             return false;
         }
 
         // check if tile is walkable
-        // need to check if tile is not already visited
         int tile = map[map.length - 1 - y][x];
-        //int tile = map[y][x];
-        //System.out.println("Tile: " + tile);
 
-        return tile == WallAtlasRegion.EMPTY.ordinal() || tile == WallAtlasRegion.PELLET_SMALL.ordinal() || tile == WallAtlasRegion.PELLET_LARGE.ordinal() || tile == WallAtlasRegion.JAIL_DOOR.ordinal();
+        return tile == WallAtlasRegion.EMPTY.ordinal() ||
+            tile == WallAtlasRegion.PELLET_SMALL.ordinal() ||
+            tile == WallAtlasRegion.PELLET_LARGE.ordinal() ||
+            tile == WallAtlasRegion.JAIL_DOOR.ordinal(); // ghost allowed through jail doors
     }
 
     private float heuristic(Vector2 a, Vector2 b) {
@@ -114,7 +96,6 @@ public class Pathfinding {
             currentNode = currentNode.parent;
         }
         Collections.reverse(path);
-        System.out.println("Returning Path: " + path);
         return path;
     }
 }

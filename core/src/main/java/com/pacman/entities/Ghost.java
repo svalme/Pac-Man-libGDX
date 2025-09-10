@@ -38,7 +38,7 @@ public class Ghost {
         this.position = position;
         this.state = CHASE;  // Default state
         this.map = map;
-        this.pathManager = new PathManager(map);
+        this.pathManager = new PathManager();
 
         this.scatterTarget = new Vector2(12, 15); // test scatter corner
         this.homeBase = new Vector2(14, 15); // test home position
@@ -56,12 +56,10 @@ public class Ghost {
 
     // make sure we don't do the next step in the path unless we've fully crossed to this tile
     public void updateTarget(Vector2 pacmanPosition, float deltaTime) {
-        //System.out.println("Ghost state: " + this.state);
+
         switch (state) {
             case CHASE:
                 target = pacmanPosition;
-                // target = pacman.getPacmanTilePosition()? but you need a reference to pacman
-                // maybe a coordination class that has a reference to pacman instead? then we use that class if necessary?
                 pathManager.updatePath(position, target); // A* Path to Pac-Man
                 break;
 
@@ -110,10 +108,6 @@ public class Ghost {
         } while (!isValidTarget(randomTarget)); // Keep picking until it's valid
 
         return randomTarget;
-    }
-
-    public void move(float deltaTime) {
-        //pathManager.moveTowardsTarget(position, nextMove, deltaTime);
     }
 
     public void render(SpriteBatch batch) {

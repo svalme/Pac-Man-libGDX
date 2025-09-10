@@ -10,9 +10,9 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.pacman.test.DebugPathfindingScreen;
 import com.badlogic.gdx.Input.Keys;
+import com.pacman.utilities.ServiceLocator;
 
 
 /** First screen of the application. Displayed after the application is created. */
@@ -27,12 +27,11 @@ public class MenuScreen implements Screen {
 
     public MenuScreen(final Game game) {
         this.game = game;
-
+        ServiceLocator.registerGame(game);
     }
 
     @Override
     public void show() {
-        // Prepare your screen here.
 
         float tileSize = 16;
         float worldWidth = 650;  // 448
@@ -58,12 +57,10 @@ public class MenuScreen implements Screen {
             (float) Gdx.graphics.getHeight() / 2
         ); // Center screen
 
-        //System.out.println("play button height: " + (float) (Gdx.graphics.getHeight() / 2));
-
         play_button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new GameScreen(game)); // Navigate to the GameScreen
+                game.setScreen(new GameScreen()); // Navigate to the GameScreen
             }
         });
 
@@ -78,12 +75,9 @@ public class MenuScreen implements Screen {
             (float) (Gdx.graphics.getHeight() / 2) - (button_height + space_between_buttons)
         ); // Center screen
 
-        //System.out.println("scores button height: " + (float) ((Gdx.graphics.getHeight() / 2) - (button_height + space_between_buttons)));
-
         scores_button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //game.setScreen(); // Navigate to the GameScreen
             }
         });
 
@@ -98,24 +92,17 @@ public class MenuScreen implements Screen {
             (float) (Gdx.graphics.getHeight() / 2) - 2*(button_height + space_between_buttons)
         ); // Center screen
 
-        //System.out.println("exit button height: " + (float) ((Gdx.graphics.getHeight() / 2) - 2*(button_height + space_between_buttons)));
-
         exit_button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //game.setScreen(new GameScreen(game)); // Navigate to the GameScreen
             }
         });
 
         InputProcessor debugInput = new InputAdapter() {
             @Override
             public boolean keyUp(int keycode) {
-                // Check if the released key was F1
-                if (keycode == Input.Keys.F1) {
-                    // Toggle the debug mode flag
-                    //isDebugMode = !isDebugMode;
-                    //Gdx.app.log("F1Toggle", "Debug mode toggled: " + isDebugMode);
-                    game.setScreen(new DebugPathfindingScreen(game));
+                if (keycode == Input.Keys.F1) { // Check if the released key was F1
+                    game.setScreen(new DebugPathfindingScreen());
                     return true; // The event was handled
                 }
                 return false; // The event was not handled
@@ -124,8 +111,6 @@ public class MenuScreen implements Screen {
 
         InputMultiplexer multiplexer = new InputMultiplexer(stage, debugInput);
         Gdx.input.setInputProcessor(multiplexer); // Set the input processor to handle key events
-
-
 
         stage.addActor(play_button);
         stage.addActor(scores_button);
