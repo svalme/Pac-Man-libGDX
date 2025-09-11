@@ -55,9 +55,12 @@ public class GameScreen implements Screen {
 
         pacman = new Pacman();
         ghosts = new ArrayList<>();
-        ghosts.add(new Ghost(new Vector2(14, 16), new Texture("ghost_orange_soft.png"), map.map));
+
+        Ghost orange_ghost = new Ghost(new Vector2(14, 16), new Texture("ghost_orange_soft.png"));
+        ghosts.add(orange_ghost);
         for (Ghost ghost : ghosts) {
             ghost.setState(GhostState.CHASE);
+            pacman.addListener(ghost);
         }
 
     }
@@ -101,7 +104,7 @@ public class GameScreen implements Screen {
 
         // update ghost positions and behaviors
         for (Ghost ghost : ghosts) {
-            ghost.updateTarget(pacman.getPacmanTilePosition(), deltaTime); // passing pacman's position for targeting
+            ghost.updateTarget(deltaTime); // passing pacman's position for targeting
             // move ghost along the path
             //ghost.interpolateMove(deltaTime);
 

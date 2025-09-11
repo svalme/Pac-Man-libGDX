@@ -7,10 +7,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.pacman.utilities.ServiceLocator;
 
 import java.util.Random;
 
-public class Ghost {
+public class Ghost implements PacmanListener {
     private static final int TILE_SIZE = 24;
 
     private Vector2 position;
@@ -18,7 +19,7 @@ public class Ghost {
     private Vector2 nextMove;
     private Vector2 scatterTarget;
     private Vector2 homeBase;
-
+    private Vector2 pacmanPosition;
     private GhostState state;
 
     private PathManager pathManager;
@@ -34,10 +35,10 @@ public class Ghost {
     private static final float EATEN_SPEED = 120f; // back to home
 
 
-    public Ghost(Vector2 position, Texture texture, int[][] map) {
+    public Ghost(Vector2 position, Texture texture) {
         this.position = position;
         this.state = CHASE;  // Default state
-        this.map = map;
+        this.map = ServiceLocator.getMapInstance().map;
         this.pathManager = new PathManager();
 
         this.scatterTarget = new Vector2(12, 15); // test scatter corner
@@ -54,8 +55,13 @@ public class Ghost {
     }
 */
 
+    @Override
+    public void onPacmanMoved(Vector2 newPosition) {
+        pacmanPosition = newPosition.cpy(); // Update target whenever Pacman moves
+    }
+
     // make sure we don't do the next step in the path unless we've fully crossed to this tile
-    public void updateTarget(Vector2 pacmanPosition, float deltaTime) {
+    public void updateTarget(float deltaTime) {
 
         switch (state) {
             case CHASE:

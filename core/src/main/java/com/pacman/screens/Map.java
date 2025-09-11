@@ -109,16 +109,16 @@ public class Map {
 
         // adjust leading edge based on the direction and pacman's center coordinates
         switch (direction) {
-            case Direction.UP:
+            case UP:
                 leadingY += radius;
                 break;
-            case Direction.DOWN:
+            case DOWN:
                 leadingY -= radius;
                 break;
-            case Direction.LEFT:
+            case LEFT:
                 leadingX -= radius;
                 break;
-            case Direction.RIGHT:
+            case RIGHT:
                 leadingX += radius;
                 break;
         }
@@ -128,17 +128,23 @@ public class Map {
         int tileY = map.length - 1 - (int)(leadingY / TILE_SIZE);
 
         // check bounds
-        if (tileY < 0 || tileY >= map.length || tileX < 0 || tileX >= map[0].length) {
+        if (tileY < 0 || tileY >= map.length ) {
             return false; // Out of bounds = collision
+        }
+
+        if (tileX < 0 || tileX >= map[0].length) {
+            return true; // true for wrap-around
         }
 
         int tileValue = map[tileY][tileX];
         //System.out.printf("tileY: %d, tileX: %d\n", tileY, tileX);
         //System.out.printf("tileValue: %d\n", tileValue);
         // check if the tile is a wall
-        boolean collision = (tileValue != WallAtlasRegion.EMPTY.ordinal()) && (tileValue != WallAtlasRegion.PELLET_LARGE.ordinal()) && (tileValue != WallAtlasRegion.PELLET_SMALL.ordinal());
+        return (tileValue == WallAtlasRegion.EMPTY.getValue()) ||
+               (tileValue == WallAtlasRegion.PELLET_LARGE.getValue()) ||
+               (tileValue == WallAtlasRegion.PELLET_SMALL.getValue());
         //System.out.printf("collision: %b\n", collision);
-        return collision; // hit empty wall or pellet
+        //return collision; // hit empty wall or pellet
     }
 
     // return the x coordinate of the center of a tile

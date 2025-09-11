@@ -9,6 +9,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Circle;
 import com.pacman.utilities.ServiceLocator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class Pacman {
 
@@ -29,6 +32,8 @@ public class Pacman {
     private Direction direction;
     //private Map map;
 
+    private List<PacmanListener> listeners;
+
     public Pacman() {
         // default position: place pacman at the center of tile (13, 23)
         this.centerX = Map.getTileCenterX(13);
@@ -45,6 +50,8 @@ public class Pacman {
         direction = Direction.RIGHT;
         currentFrame = acutePacman; // default to open mouth
         stateTime = 0;
+
+        listeners = new ArrayList<>();
 
         mapInstance = ServiceLocator.getMapInstance();
     }
@@ -91,17 +98,24 @@ public class Pacman {
         }
 
         // collision check with the map
-        if (!Map.collisionFree(targetX, targetY, radius, direction)) {
-           // System.out.printf("collision free: x: %f, y: %f\n", targetX, targetY);
+        if (Map.collisionFree(targetX, targetY, radius, direction)) {
             centerX = targetX;
             centerY = targetY;
         }
 
+        float mapWidth = mapInstance.map[0].length * Map.TILE_SIZE;
+
         // enter through side tunnel
-        if (centerX < 0) {
-            centerX = mapInstance.map[0].length * Map.TILE_SIZE - Map.TILE_SIZE / 2; // wrap to the right
-        } else if (centerX >= mapInstance.map[0].length * Map.TILE_SIZE) {
-            centerX = Map.TILE_SIZE / 2; // wrap to the left
+        if (centerX < -radius) {
+            centerX = mapWidth - Map.TILE_SIZE / 2f; // wrap to the right
+        } else if (centerX > mapWidth + radius) {
+            System.out.println("centerX > mapInstance.map[0].length * Map.TILE_SIZE - 2 + radius");
+            centerX = Map.TILE_SIZE / 2f; // wrap to the left
+        }
+
+        // notify all observers
+        for (PacmanListener listener : listeners) {
+            listener.onPacmanMoved(getPacmanTilePosition());
         }
 
         updatePacmanAnimationState(deltaTime);
@@ -174,6 +188,8 @@ public class Pacman {
         return new Vector2(tileX, tileY); // return grid position
     }
 
-
+    public void addListener(PacmanListener listener) {
+        listeners.add(listener);
+    }
 
 }
