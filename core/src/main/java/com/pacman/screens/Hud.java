@@ -18,12 +18,10 @@ public class Hud {
     }
 
     public void render(SpriteBatch batch, int score, int lives) {
-        // draw score at top-left
-        font.draw(batch, "SCORE: " + score, 20, 460);
+        font.draw(batch, "SCORE: " + score, 720, 460);
 
-        // draw lives at bottom-left
         for (int i = 0; i < lives; i++) {
-            batch.draw(lifeIcon, 20 + i * 30, 20, 24, 24);
+            batch.draw(lifeIcon, 720 + i * 30, 20, 24, 24);
         }
     }
 

@@ -31,13 +31,14 @@ public class GameScreen implements Screen {
     private int rows = 31;
     private OrthographicCamera camera;
     private FitViewport viewport;
-
+    private Hud hud;
 
     public GameScreen() {}
 
     @Override
     public void show() {
 
+        /*
         int mapWidth = columns * TILE_SIZE;
         int mapHeight = rows * TILE_SIZE;
 
@@ -48,10 +49,24 @@ public class GameScreen implements Screen {
         // center the camera
         camera.position.set(mapWidth / 2f, mapHeight / 2f, 0);
         camera.update();
+        */
+
+        int screenWidth = columns * TILE_SIZE + 400;
+        int screenHeight = rows * TILE_SIZE;
+
+        // set up the camera
+        camera = new OrthographicCamera();
+        viewport = new FitViewport(screenWidth, screenHeight, camera);
+
+        // center the camera
+        camera.position.set(screenWidth / 2f, screenHeight / 2f, 0);
+        camera.update();
 
         batch = new SpriteBatch();
         map = new Map();
         ServiceLocator.registerMap(map);
+
+        hud = new Hud();
 
         pacman = new Pacman();
         ghosts = new ArrayList<>();
@@ -85,6 +100,8 @@ public class GameScreen implements Screen {
         batch.begin();
         map.drawMap(batch);
         pacman.render(batch);
+
+        hud.render(batch, pacman.getScore(), pacman.getLives());
 
         // draw ghosts
         for (Ghost ghost : ghosts) {
@@ -132,5 +149,6 @@ public class GameScreen implements Screen {
     public void dispose() {
         batch.dispose();
         map.dispose();
+        hud.dispose();
     }
 }

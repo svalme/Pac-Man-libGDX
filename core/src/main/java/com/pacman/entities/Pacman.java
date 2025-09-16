@@ -1,6 +1,7 @@
 package com.pacman.entities;
 
 import com.badlogic.gdx.math.Vector2;
+import com.pacman.entities.Direction;
 import com.pacman.screens.Map;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -22,6 +23,7 @@ public class Pacman {
     private final int pacmanTileSize = 15;
 
     private int lives; // pacman lives
+    private int score;
 
     private Map mapInstance;
 
@@ -45,6 +47,8 @@ public class Pacman {
 
         // default state
         lives = 3;
+        score = 0;
+
         direction = Direction.RIGHT;
         currentFrame = acutePacman; // default to open mouth
         stateTime = 0;
@@ -215,6 +219,14 @@ public class Pacman {
 
     public void addListener(PacmanListener listener) {
         listeners.add(listener);
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public int getLives() {
+        return lives;
     }
 
 }
