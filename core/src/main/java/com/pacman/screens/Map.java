@@ -1,5 +1,6 @@
 package com.pacman.screens;
 
+import com.badlogic.gdx.math.Vector2;
 import com.pacman.entities.Direction;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -14,6 +15,13 @@ public class Map {
     public static final int TILE_SIZE = 24; // tile size
     public static int columns = 28;
     public static int rows = 31;
+
+    public static final Vector2[] NEIGHBORS = {
+            new Vector2( 1,  0),  // right
+            new Vector2(-1,  0),  // left
+            new Vector2( 0,  1),  // up
+            new Vector2( 0, -1)   // down
+    };
 
     public Map() {
 
@@ -86,23 +94,6 @@ public class Map {
 
     }
 
-    /*
-    public boolean collisionFree(float worldX, float worldY) {
-        // Convert world coordinates to tile coordinates
-        int tileX = (int) (worldX / TILE_SIZE);
-        int tileY = (int) (worldY / TILE_SIZE);
-
-        // Check bounds to avoid out-of-bounds errors
-        if (tileX < 0 || tileX >= columns || tileY < 0 || tileY >= rows) {
-            return false;
-        }
-
-        // Check the value of the tile
-        int tileValue = map[tileY][tileX];
-        System.out.printf("tileValue: %d\n", tileValue);
-        return (tileValue != WallAtlasRegion.EMPTY.ordinal()) && (tileValue != WallAtlasRegion.PELLET_LARGE.ordinal()) && (tileValue != WallAtlasRegion.PELLET_SMALL.ordinal()); // hit empty wall or pellet
-    }*/
-
     public static boolean collisionFree(float centerX, float centerY, float radius, Direction direction) {
         float leadingX = centerX;
         float leadingY = centerY;
@@ -128,13 +119,13 @@ public class Map {
         int tileY = map.length - 1 - (int)(leadingY / TILE_SIZE);
 
         // check bounds
-        if (tileY < 0 || tileY >= map.length ) {
+        if (tileY < 0 || tileY >= map.length || tileX < 0 || tileX >= map[0].length) {
             return false; // Out of bounds = collision
         }
-
+/*
         if (tileX < 0 || tileX >= map[0].length) {
             return true; // true for wrap-around
-        }
+        }*/
 
         int tileValue = map[tileY][tileX];
         //System.out.printf("tileY: %d, tileX: %d\n", tileY, tileX);
@@ -145,6 +136,18 @@ public class Map {
                (tileValue == WallAtlasRegion.PELLET_SMALL.getValue());
         //System.out.printf("collision: %b\n", collision);
         //return collision; // hit empty wall or pellet
+    }
+
+    public boolean isWall(int tileX, int tileY) {
+
+        if (tileY < 0 || tileY >= map.length || tileX < 0 || tileX >= map[0].length) {
+            return true;
+        }
+
+        int tileValue = map[tileY][tileX];
+        return (tileValue != WallAtlasRegion.EMPTY.getValue()) ||
+                (tileValue != WallAtlasRegion.PELLET_LARGE.getValue()) ||
+                (tileValue != WallAtlasRegion.PELLET_SMALL.getValue());
     }
 
     // return the x coordinate of the center of a tile

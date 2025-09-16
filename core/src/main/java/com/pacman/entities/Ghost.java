@@ -58,6 +58,8 @@ public class Ghost implements PacmanListener {
     @Override
     public void onPacmanMoved(Vector2 newPosition) {
         pacmanPosition = newPosition.cpy(); // Update target whenever Pacman moves
+        System.out.println("isValidTarget: " + isValidTarget(pacmanPosition));
+        System.out.println("newPosition: " + newPosition);
     }
 
     // make sure we don't do the next step in the path unless we've fully crossed to this tile
@@ -99,9 +101,14 @@ public class Ghost implements PacmanListener {
         int tileY = (int) target.y;
 
         // Check if the tile is within map bounds and walkable
-        return tileX >= 0 && tileX < map.length &&
-            tileY >= 0 && tileY < map[0].length &&
-            (map[tileX][tileY] == 0 || map[tileX][tileY] == 26 || map[tileX][tileY] == 27);  // 0: EMPTY, 26: PELLET_LARGE, 27: PELLET_SMALL
+        if (tileX < 0 || tileX >= map.length ||
+            tileY < 0 || tileY >= map[0].length) {
+            return false;
+        }
+
+        //System.out.println("in isValidTarget: Tile: " + map[tileX][tileY]);
+
+        return (map[tileX][tileY] == 0 || map[tileX][tileY] == 26 || map[tileX][tileY] == 27 || map[tileX][tileY] == 15) ;  // 0: EMPTY, 26: PELLET_LARGE, 27: PELLET_SMALL, 15: JAIL_DOOR
     }
 
     private Vector2 getRandomTarget() {

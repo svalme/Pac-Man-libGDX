@@ -30,7 +30,6 @@ public class Pacman {
     private TextureRegion acutePacman; // mouth open at acute angle
     private TextureRegion currentFrame;
     private Direction direction;
-    //private Map map;
 
     private List<PacmanListener> listeners;
 
@@ -40,7 +39,6 @@ public class Pacman {
         this.centerY = Map.getTileCenterY(23);
         this.radius = 6;
 
-        //this.map = map;
         atlas = new TextureAtlas("pacman.atlas");
         ninetyPacman = atlas.findRegion("pacman_ninety");
         acutePacman = atlas.findRegion("pacman_acute");
@@ -83,18 +81,27 @@ public class Pacman {
         float targetY = centerY;
 
         switch (direction) {
-            case Direction.UP:
+            case UP:
                 targetY += speed * deltaTime;
                 break;
-            case Direction.DOWN:
+            case DOWN:
                 targetY -= speed * deltaTime;
                 break;
-            case Direction.LEFT:
+            case LEFT:
                 targetX -= speed * deltaTime;
                 break;
-            case Direction.RIGHT:
+            case RIGHT:
                 targetX += speed * deltaTime;
                 break;
+        }
+
+        float mapWidth = mapInstance.map[0].length * Map.TILE_SIZE;
+
+        // enter through side tunnel
+        if (centerX < -radius) {
+            centerX = mapWidth - Map.TILE_SIZE / 2f; // wrap to the right
+        } else if (centerX > mapWidth - Map.TILE_SIZE / 2f) {
+            centerX = Map.TILE_SIZE / 2f; // wrap to the left
         }
 
         // collision check with the map
@@ -103,19 +110,9 @@ public class Pacman {
             centerY = targetY;
         }
 
-        float mapWidth = mapInstance.map[0].length * Map.TILE_SIZE;
-
-        // enter through side tunnel
-        if (centerX < -radius) {
-            centerX = mapWidth - Map.TILE_SIZE / 2f; // wrap to the right
-        } else if (centerX > mapWidth + radius) {
-            System.out.println("centerX > mapInstance.map[0].length * Map.TILE_SIZE - 2 + radius");
-            centerX = Map.TILE_SIZE / 2f; // wrap to the left
-        }
-
         // notify all observers
         for (PacmanListener listener : listeners) {
-            listener.onPacmanMoved(getPacmanTilePosition());
+            listener.onPacmanMoved(getPacmanLogicalTile());
         }
 
         updatePacmanAnimationState(deltaTime);
@@ -187,6 +184,34 @@ public class Pacman {
 
         return new Vector2(tileX, tileY); // return grid position
     }
+
+    public Vector2 getPacmanLogicalTile() {
+        int tileX = (int) Math.floor(centerX / Map.TILE_SIZE);
+        int tileY = (int) Math.floor(centerY / Map.TILE_SIZE);
+
+        if (mapInstance.isWall(tileX, tileY)) {
+            // choose the nearest non-wall neighbor
+            Vector2 best = null;
+            float bestDist = Float.MAX_VALUE;
+
+            for (Vector2 dir : Map.NEIGHBORS) { // up, down, left, right
+                int nx = tileX + (int)dir.x;
+                int ny = tileY + (int)dir.y;
+                if (!mapInstance.isWall(nx, ny)) {
+                    float dx = centerX - (nx * Map.TILE_SIZE + Map.TILE_SIZE/2f);
+                    float dy = centerY - (ny * Map.TILE_SIZE + Map.TILE_SIZE/2f);
+                    float dist = dx*dx + dy*dy;
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        best = new Vector2(nx, ny);
+                    }
+                }
+            }
+            return best != null ? best : new Vector2(tileX, tileY);
+        }
+        return new Vector2(tileX, tileY);
+    }
+
 
     public void addListener(PacmanListener listener) {
         listeners.add(listener);
