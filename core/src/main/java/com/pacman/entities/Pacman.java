@@ -2,8 +2,10 @@ package com.pacman.entities;
 
 import com.badlogic.gdx.math.Vector2;
 import com.pacman.entities.Direction;
+import com.pacman.entities.PacmanState;
 import com.pacman.screens.Map;
 
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -19,21 +21,20 @@ public class Pacman {
     private float centerX, centerY; // center position of Pacman
     private float radius; // radius of Pacman's collision circle
     private float stateTime; // animation state time
+    private PacmanState state;
+
     private final float speed = 650f / 5f; // set speed to 1/5th of the screen width
     private final int pacmanTileSize = 15;
 
-    private int lives; // pacman lives
-    private int score;
-
-    private Map mapInstance;
-
-    TextureAtlas atlas;
+    private TextureAtlas atlas;
+    private TextureRegion currentFrame;
     private TextureRegion ninetyPacman; // mouth open at ninety-degree angle
     private TextureRegion acutePacman; // mouth open at acute angle
-    private TextureRegion currentFrame;
+    private Animation<TextureRegion> deathAnimation;
+
     private Direction direction;
 
-    private List<PacmanListener> listeners;
+    private ArrayList<PacmanListener> listeners;
 
     public Pacman() {
         // default position: place pacman at the center of tile (13, 23)
@@ -44,18 +45,16 @@ public class Pacman {
         atlas = new TextureAtlas("pacman.atlas");
         ninetyPacman = atlas.findRegion("pacman_ninety");
         acutePacman = atlas.findRegion("pacman_acute");
+        deathAnimation = new Animation<TextureRegion>(0.3f, atlas.findRegions("pacman_death"));
+        deathAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
-        // default state
-        lives = 3;
-        score = 0;
-
-        direction = Direction.RIGHT;
         currentFrame = acutePacman; // default to open mouth
+        
         stateTime = 0;
-
+        state = PacmanState.ALIVE;
+        direction = Direction.RIGHT;
+        
         listeners = new ArrayList<>();
-
-        mapInstance = ServiceLocator.getMapInstance();
     }
 
     public float getCenterX() {
@@ -75,11 +74,23 @@ public class Pacman {
     }
 
     public void setPosition(int row, int column) {
-        this.centerX = Map.getTileCenterX(column);
         this.centerY = Map.getTileCenterY(row);
+        this.centerX = Map.getTileCenterX(column);
+    }
+
+    public void resetPosition() {
+        // reset Pac-Man to the starting position
+        setPosition(23, 13);
     }
 
     public void update(float deltaTime) {
+        if (state == PacmanState.DYING) {
+            updateDeath(deltaTime);
+            return;
+        }
+
+        if (state == PacmanState.DEAD) return;
+
         // update position based on direction and speed
         float targetX = centerX;
         float targetY = centerY;
@@ -97,9 +108,11 @@ public class Pacman {
             case RIGHT:
                 targetX += speed * deltaTime;
                 break;
+            default:
+                break;
         }
 
-        float mapWidth = mapInstance.map[0].length * Map.TILE_SIZE;
+        float mapWidth = Map.columns * Map.TILE_SIZE;
 
         // enter through side tunnel
         if (centerX < -radius) {
@@ -116,10 +129,11 @@ public class Pacman {
 
         // notify all observers
         for (PacmanListener listener : listeners) {
-            listener.onPacmanMoved(getPacmanLogicalTile());
+            listener.onPacmanMoved(getPacmanLogicalTile(), direction);
         }
 
         updatePacmanAnimationState(deltaTime);
+        checkPelletCollision();
 
     }
 
@@ -127,7 +141,7 @@ public class Pacman {
         // update animation frame for mouth state
         // alternate between ninety and acute mouth based on time
         stateTime += deltaTime;
-        if (stateTime >= 0.3f) { // toggle between acute and obtuse every 0.3 seconds
+        if (stateTime >= 0.3f) { // toggle between acute and obtuse 
             currentFrame = (currentFrame == acutePacman) ? ninetyPacman : acutePacman;
             stateTime = 0; // reset state time
         }
@@ -135,7 +149,7 @@ public class Pacman {
 
     public void render(SpriteBatch batch) {
         // rotate pac-man based on the current direction
-        float rotationAngle = 0;
+        float rotationAngle;
 
         switch (direction) {
             case RIGHT:
@@ -148,7 +162,10 @@ public class Pacman {
                 rotationAngle = 180; // rotate 90 degrees left
                 break;
             case DOWN:
-                rotationAngle = 270; // flip vertically for down
+                rotationAngle = 270; // flip vertically to go down
+                break;
+            default:
+                rotationAngle = 0;
                 break;
         }
 
@@ -162,15 +179,53 @@ public class Pacman {
         batch.draw(currentFrame, drawX, drawY, offsetX, offsetY, pacmanTileSize, pacmanTileSize, 1, 1, rotationAngle);
     }
 
-    private void ghostCollision() {
-        lives--;
-        resetPacmanPosition();
+    private void updateDeath(float delta) {
+        stateTime += delta;
+
+        currentFrame = deathAnimation.getKeyFrame(stateTime, false);
+
+        if (deathAnimation.isAnimationFinished(stateTime)) {
+            state = PacmanState.DEAD;
+        }
     }
 
-    private void resetPacmanPosition() {
-        // reset Pac-Man to the starting position
-        centerX = Map.getTileCenterX(13);
-        centerY = Map.getTileCenterY(23);
+    private void checkPelletCollision() {
+        Vector2 position = getPacmanMapTile();
+        int tileX = (int)(position.x);
+        int tileY = (int)(position.y);
+
+        if (Map.isPellet(tileX, tileY)) {
+            ServiceLocator.getGameManager().onPelletEaten(tileX, tileY, Map.isPowerPellet(tileX, tileY));
+        }
+    }
+
+    public void die() {
+        if (state == PacmanState.DYING) return;
+        state = PacmanState.DYING;
+        stateTime = 0;
+    }
+
+    public void revive() {
+        state = PacmanState.ALIVE;
+        currentFrame = acutePacman;
+        resetPosition();
+    }
+
+    public boolean isDead() {
+        return state == PacmanState.DEAD;
+    }
+
+    public PacmanState getState() {
+        return state;
+    }
+
+    public Vector2 getPacmanMapTile() {
+        int tileX = (int)(centerX / Map.TILE_SIZE);
+        int tileY = (int)(centerY / Map.TILE_SIZE);
+
+        int mapY = Map.rows - 1 - tileY;
+
+        return new Vector2(tileX, mapY);
     }
 
     public Vector2 getPacmanTilePosition() {
@@ -181,10 +236,7 @@ public class Pacman {
 
         if (tileX >= 0 && tileX < Map.columns &&
             flippedY >= 0 && flippedY < Map.rows) {
-            System.out.println("Tile: " + mapInstance.map[flippedY][tileX]);
-        } else {
-            System.out.println("Out of bounds: (" + tileX + "," + flippedY + ")");
-        }
+        } 
 
         return new Vector2(tileX, tileY); // return grid position
     }
@@ -193,7 +245,7 @@ public class Pacman {
         int tileX = (int) Math.floor(centerX / Map.TILE_SIZE);
         int tileY = (int) Math.floor(centerY / Map.TILE_SIZE);
 
-        if (mapInstance.isWall(tileX, tileY)) {
+        if (Map.isWall(tileX, tileY)) {
             // choose the nearest non-wall neighbor
             Vector2 best = null;
             float bestDist = Float.MAX_VALUE;
@@ -201,10 +253,10 @@ public class Pacman {
             for (Vector2 dir : Map.NEIGHBORS) { // up, down, left, right
                 int nx = tileX + (int)dir.x;
                 int ny = tileY + (int)dir.y;
-                if (!mapInstance.isWall(nx, ny)) {
+                if (!Map.isWall(nx, ny)) {
                     float dx = centerX - (nx * Map.TILE_SIZE + Map.TILE_SIZE/2f);
                     float dy = centerY - (ny * Map.TILE_SIZE + Map.TILE_SIZE/2f);
-                    float dist = dx*dx + dy*dy;
+                    float dist = dx * dx + dy * dy;
                     if (dist < bestDist) {
                         bestDist = dist;
                         best = new Vector2(nx, ny);
@@ -216,17 +268,8 @@ public class Pacman {
         return new Vector2(tileX, tileY);
     }
 
-
     public void addListener(PacmanListener listener) {
         listeners.add(listener);
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public int getLives() {
-        return lives;
     }
 
 }

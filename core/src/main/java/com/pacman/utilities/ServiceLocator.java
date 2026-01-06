@@ -1,27 +1,38 @@
 package com.pacman.utilities;
 
 import com.badlogic.gdx.Game;
-import com.pacman.screens.Map;
+import com.pacman.entities.GhostManager;
+import com.pacman.screens.GameManager;
 
 public class ServiceLocator {
 
-    private static Game gameInstance;
-    private static Map mapInstance;
+    private static Game game;
+    private static GhostManager ghostManager;
+    private static GameManager  gameManager;
 
-    public static void registerGame(Game game) {
-        gameInstance = game;
+    public static void registerGame(Game g) {
+        game = g;
     }
 
-    public static Game getGameInstance() {
-        return gameInstance;
+    public static Game getGame() {
+        return game;
     }
 
-    public static void registerMap(Map map) {
-        mapInstance = map;
+    public static void registerGhostManager(GhostManager gm) {
+        ghostManager = gm;
     }
 
-    public static Map getMapInstance() {
-        return mapInstance;
+    public static GhostManager getGhostManager() {
+        return ghostManager;
     }
+
+    public static void registerGameManager(GameManager gm) {
+        gameManager = gm;
+    }
+
+    public static GameManager getGameManager() {
+        return gameManager;
+    }
+
 
 }

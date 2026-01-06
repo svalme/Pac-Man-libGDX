@@ -30,7 +30,7 @@ public class DebugPathfindingScreen implements Screen {
     private final int TILE_SIZE = 32;
 
     public DebugPathfindingScreen() {
-        this.game = ServiceLocator.getGameInstance();
+        this.game = ServiceLocator.getGame();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 640, 480);
         shapeRenderer = new ShapeRenderer();

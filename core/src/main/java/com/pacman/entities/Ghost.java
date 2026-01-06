@@ -1,15 +1,15 @@
 package com.pacman.entities;
 
+import com.pacman.utilities.FrightenedPathFinder;
 import com.pacman.utilities.PathManager;
-import static com.pacman.entities.GhostState.*;
+import com.pacman.utilities.ServiceLocator;
+import com.pacman.entities.GhostState;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.pacman.utilities.ServiceLocator;
-
-import java.util.Random;
 
 public class Ghost implements PacmanListener {
     private static final int TILE_SIZE = 24;
@@ -20,126 +20,202 @@ public class Ghost implements PacmanListener {
     private Vector2 scatterTarget;
     private Vector2 homeBase;
     private Vector2 pacmanPosition;
+    private Direction pacmanDirection;
     private GhostState state;
 
     private PathManager pathManager;
-    private int[][] map;
+    private FrightenedPathFinder frightenedPathFinder;
 
-    private Texture normalTexture;
-    private Texture frightenedTexture;
-    private Texture eatenTexture;
+    private GhostType type;
+    private TextureRegion normalTexture;
+    private TextureRegion blueFrightenedTexture;
+    private TextureRegion eatenTexture;
+    private TextureRegion whiteFrightenedTexture;
 
-    private static final float CHASE_SPEED = 80f;
-    private static final float SCATTER_SPEED = 80f;
-    private static final float FRIGHTENED_SPEED = 40f;
-    private static final float EATEN_SPEED = 120f; // back to home
+    private final float FRIGHTENED_SPEED = 5f;
+    private float frightenedTimer;
+    private final float FRIGHTENED_DURATION;
+    private final float FLASH_START; // last 2 seconds
+    private float flashTimer;
+    private boolean flashWhite;
 
 
-    public Ghost(Vector2 position, Texture texture) {
+    public Ghost(Vector2 position, GhostType type) {
         this.position = position;
-        this.state = CHASE;  // Default state
-        this.map = ServiceLocator.getMapInstance().map;
+        this.state = GhostState.CHASE;  // Default state
+        this.type = type;
+
         this.pathManager = new PathManager();
+        this.frightenedPathFinder = new FrightenedPathFinder();
+        this.homeBase = position; // test home position
+        this.nextMove = position;
+       
+        frightenedTimer = 0f;
+        FRIGHTENED_DURATION = 6f;
+        FLASH_START = 2f; // last 2 seconds
+        flashTimer = 0f;
+        flashWhite = false;
 
-        this.scatterTarget = new Vector2(12, 15); // test scatter corner
-        this.homeBase = new Vector2(14, 15); // test home position
-        this.nextMove = homeBase;
-
-        this.normalTexture = texture;
-       // loadTextures();
+        loadTextures();
     }
-/*
+
+    public void setScatterTarget(Vector2 sTarget) {
+        this.scatterTarget = sTarget;
+    }
+
     private void loadTextures() {
-        frightenedTexture = new Texture("ghost_frightened.png");
-        eatenTexture = new Texture("ghost_eaten.png");
+        TextureAtlas atlas = new TextureAtlas("ghosts.atlas");
+
+        switch (type) {
+            case PINKY:
+                this.normalTexture = atlas.findRegion("ghost_pink_soft");
+                break;
+            case CLYDE:
+                this.normalTexture = atlas.findRegion("ghost_orange_soft");
+                break;
+            case INKY:
+                this.normalTexture = atlas.findRegion("ghost_blue_soft");
+                break;
+            case BLINKY:
+                this.normalTexture = atlas.findRegion("ghost_red_soft");
+                break;
+            default:
+                this.normalTexture = atlas.findRegion("ghost_orange_soft");
+                break;                
+        }
+
+        this.blueFrightenedTexture = atlas.findRegion("Ghost_Vulnerable_Blue");
+        this.eatenTexture = atlas.findRegion("Ghost_Eyes_Left");
+        this.whiteFrightenedTexture = atlas.findRegion("Ghost_Vulnerable_White");
+
     }
-*/
+
+    public void resetPosition() {
+        position = homeBase;
+    }
 
     @Override
-    public void onPacmanMoved(Vector2 newPosition) {
+    public void onPacmanMoved(Vector2 newPosition, Direction newDirection) {
         pacmanPosition = newPosition.cpy(); // Update target whenever Pacman moves
-        System.out.println("isValidTarget: " + isValidTarget(pacmanPosition));
-        System.out.println("newPosition: " + newPosition);
+        pacmanDirection = newDirection;
     }
+
+    private Vector2 computeChaseTarget() {
+        switch (type) {
+
+            case BLINKY:
+                return pacmanPosition.cpy(); // direct chase
+
+            case PINKY:
+                return pacmanPosition.cpy().add(
+                    pacmanDirection.toVector().scl(4)
+                );
+
+            case INKY:
+                Vector2 ahead = pacmanPosition.cpy()
+                    .add(pacmanDirection.toVector().scl(2));
+                Vector2 blinkyPosition = ServiceLocator.getGhostManager().getBlinky().getPosition();
+                Vector2 vec = ahead.cpy().sub(blinkyPosition);
+                return blinkyPosition.cpy().add(vec.scl(2));
+
+            case CLYDE:
+                float dist = position.dst(pacmanPosition);
+                if (dist < 8) {
+                    return scatterTarget;
+                } else {
+                    return pacmanPosition;
+                }
+
+            default:
+                return pacmanPosition;
+        }
+    }
+
 
     // make sure we don't do the next step in the path unless we've fully crossed to this tile
     public void updateTarget(float deltaTime) {
 
         switch (state) {
             case CHASE:
-                target = pacmanPosition;
+                target = computeChaseTarget();
                 pathManager.updatePath(position, target); // A* Path to Pac-Man
                 break;
-
             case SCATTER:
                 target = scatterTarget;
                 pathManager.updatePath(position, target); // A* Path to scatter corner
                 break;
-
             case FRIGHTENED:
-                if (nextMove == null /* || reachedTarget() */ ) {
-                    nextMove = getRandomTarget(); // Pick a random direction
-                }
-                position.add(nextMove.cpy().scl(deltaTime * 100f)); // Move randomly
-                return; // No A*
-
+                updateFrightened(deltaTime);
+                frightenedPathFinder.update(position, FRIGHTENED_SPEED, deltaTime);
+                break;
             case EATEN:
                 target = homeBase;
                 pathManager.updatePath(position, target);
                 break;
+            default:
+                break;
         }
 
-        nextMove = pathManager.moveTowardsTarget(position, deltaTime);
-        if (nextMove != null) {
-            position = nextMove;
+        if (state != GhostState.FRIGHTENED) {
+            nextMove = pathManager.moveTowardsTarget(position, deltaTime);
+            if (nextMove != null) {
+                position = nextMove;
+            }
+        } else {
+            nextMove = frightenedPathFinder.move(position, FRIGHTENED_SPEED, deltaTime);
         }
-    }
-
-    // for use with getRandomTarget()
-    private boolean isValidTarget(Vector2 target) {
-        int tileX = (int) target.x;
-        int tileY = (int) target.y;
-
-        // Check if the tile is within map bounds and walkable
-        if (tileX < 0 || tileX >= map.length ||
-            tileY < 0 || tileY >= map[0].length) {
-            return false;
-        }
-
-        //System.out.println("in isValidTarget: Tile: " + map[tileX][tileY]);
-
-        return (map[tileX][tileY] == 0 || map[tileX][tileY] == 26 || map[tileX][tileY] == 27 || map[tileX][tileY] == 15) ;  // 0: EMPTY, 26: PELLET_LARGE, 27: PELLET_SMALL, 15: JAIL_DOOR
-    }
-
-    private Vector2 getRandomTarget() {
-        Random rand = new Random();
-        Vector2 randomTarget;
-        do {
-            int x = rand.nextInt(map.length);
-            int y = rand.nextInt(map[0].length);
-            randomTarget = new Vector2(x, y);
-        } while (!isValidTarget(randomTarget)); // Keep picking until it's valid
-
-        return randomTarget;
     }
 
     public void render(SpriteBatch batch) {
-        Texture textureToUse =// (state == GhostState.FRIGHTENED) ? frightenedTexture :
-                               // (state == GhostState.EATEN) ? eatenTexture :
-                                normalTexture;
-        batch.draw(textureToUse, position.x * TILE_SIZE, position.y * TILE_SIZE);
+        TextureRegion textureRegion;
+
+        if (state == GhostState.EATEN) {
+            textureRegion = eatenTexture;
+        } else if (state == GhostState.FRIGHTENED) {
+            textureRegion = flashWhite ? whiteFrightenedTexture : blueFrightenedTexture;
+        } else {
+            textureRegion = this.normalTexture;
+        }
+
+        batch.draw(textureRegion, position.x * TILE_SIZE, position.y * TILE_SIZE);
     }
 
-    public void setState(GhostState newState) {
-        this.state = newState;
-    }
 
     public GhostState getState() {
         return this.state;
     }
 
     public Vector2 getPosition() {
-        return position;
+        return this.position;
     }
+
+    public void setState(GhostState newState) {
+        if (newState == GhostState.FRIGHTENED) {
+            frightenedTimer = FRIGHTENED_DURATION;
+            flashTimer = 0f;
+            flashWhite = false;
+            frightenedPathFinder.reset();
+        }
+        this.state = newState;
+    }
+    
+    private void updateFrightened(float delta) {
+        frightenedTimer -= delta;
+
+        if (frightenedTimer <= 0f) {
+            state = GhostState.CHASE;
+            return;
+        }
+
+        // flashing near the end
+        if (frightenedTimer <= FLASH_START) {
+            flashTimer += delta;
+            if (flashTimer >= 0.2f) {
+                flashWhite = !flashWhite;
+                flashTimer = 0f;
+            }
+        }
+    }
+
 
 }

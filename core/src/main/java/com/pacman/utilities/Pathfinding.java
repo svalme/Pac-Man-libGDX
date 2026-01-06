@@ -3,8 +3,11 @@ package com.pacman.utilities;
 import com.badlogic.gdx.math.Vector2;
 import com.pacman.screens.Map;
 import com.pacman.screens.WallAtlasRegion;
+import com.pacman.entities.Direction;
+import com.pacman.test.PathPrinter;
 
 import java.util.*;
+
 
 public class Pathfinding {
 
@@ -14,8 +17,6 @@ public class Pathfinding {
         new Vector2(0, 1),  // down
         new Vector2(0, -1)  // up
     };
-
-    private int[][] map = ServiceLocator.getMapInstance().map;
 
     public List<Vector2> aStarPathfinding(Vector2 start, Vector2 target) {
 
@@ -71,13 +72,11 @@ public class Pathfinding {
     }
 
     private boolean isValidMove(int x, int y) {
-
-        if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) { // check bounds
+        if (x < 0 || y < 0 || x >= Map.columns || y >= Map.rows) { // check bounds
             return false;
         }
-
-        // check if tile is walkable
-        int tile = map[map.length - 1 - y][x];
+        
+        int tile = Map.map[Map.rows - 1 - y][x]; // check if tile is walkable
 
         return tile == WallAtlasRegion.EMPTY.ordinal() ||
             tile == WallAtlasRegion.PELLET_SMALL.ordinal() ||

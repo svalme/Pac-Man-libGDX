@@ -1,8 +1,5 @@
 package com.pacman.screens;
 
-import com.badlogic.gdx.math.Vector2;
-import com.pacman.entities.*;
-
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -15,7 +12,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
+
+import com.pacman.entities.Direction;
+import com.pacman.entities.Ghost;
+import com.pacman.entities.GhostState;
+import com.pacman.entities.GhostType;
+import com.pacman.entities.GhostManager;
+import com.pacman.entities.Pacman;
+import com.pacman.entities.Phase;
+
 import com.pacman.utilities.ServiceLocator;
+import com.pacman.screens.GameManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +31,11 @@ import java.util.List;
 public class GameScreen implements Screen {
 
     private SpriteBatch batch;
-    private Map map;
     private Pacman pacman;
     private List<Ghost> ghosts;
-    private static final int TILE_SIZE = 24; // tile size
-    private int columns = 28;
-    private int rows = 31;
+    private GhostManager ghostManager;
+    private GameManager gameManager;
+
     private OrthographicCamera camera;
     private FitViewport viewport;
     private Hud hud;
@@ -38,21 +45,8 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
 
-        /*
-        int mapWidth = columns * TILE_SIZE;
-        int mapHeight = rows * TILE_SIZE;
-
-        // set up the camera
-        camera = new OrthographicCamera();
-        viewport = new FitViewport(mapWidth, mapHeight, camera);
-
-        // center the camera
-        camera.position.set(mapWidth / 2f, mapHeight / 2f, 0);
-        camera.update();
-        */
-
-        int screenWidth = columns * TILE_SIZE + 400;
-        int screenHeight = rows * TILE_SIZE;
+        int screenWidth = Map.columns * Map.TILE_SIZE + 400;
+        int screenHeight = Map.rows * Map.TILE_SIZE;
 
         // set up the camera
         camera = new OrthographicCamera();
@@ -62,22 +56,55 @@ public class GameScreen implements Screen {
         camera.position.set(screenWidth / 2f, screenHeight / 2f, 0);
         camera.update();
 
+        Map.loadValues();
         batch = new SpriteBatch();
-        map = new Map();
-        ServiceLocator.registerMap(map);
-
         hud = new Hud();
 
         pacman = new Pacman();
+        List<Phase> phases = List.of(
+            new Phase(GhostState.SCATTER, 7f),
+            new Phase(GhostState.CHASE, 20f),
+            new Phase(GhostState.SCATTER, 7f),
+            new Phase(GhostState.CHASE, 20f)
+        );
+
+        ghostManager = new GhostManager(phases);
+        ServiceLocator.registerGhostManager(ghostManager);
         ghosts = new ArrayList<>();
 
-        Ghost orange_ghost = new Ghost(new Vector2(14, 16), new Texture("ghost_orange_soft.png"));
-        ghosts.add(orange_ghost);
-        for (Ghost ghost : ghosts) {
-            ghost.setState(GhostState.CHASE);
-            pacman.addListener(ghost);
-        }
+        // pink ghost
+        Ghost pink_ghost = new Ghost(new Vector2(14, 17), GhostType.PINKY); // fine
+        pink_ghost.setScatterTarget(new Vector2(12, 15)); // fine
+        ghosts.add(pink_ghost);
+        ghostManager.register(pink_ghost);
+        pacman.addListener(pink_ghost);
 
+        // orange ghost
+        Ghost orange_ghost = new Ghost(new Vector2(18, 19), GhostType.CLYDE);
+        orange_ghost.setScatterTarget(new Vector2(9, 14));
+        ghosts.add(orange_ghost);
+        ghostManager.register(orange_ghost);
+        pacman.addListener(orange_ghost);
+
+        // blue ghost
+        Ghost blue_ghost = new Ghost(new Vector2(14, 17), GhostType.INKY); // fine
+        blue_ghost.setScatterTarget(new Vector2(18, 18)); // fine
+        ghosts.add(blue_ghost);
+        ghostManager.register(blue_ghost);
+        pacman.addListener(blue_ghost);
+
+        // red ghost
+        Ghost red_ghost = new Ghost(new Vector2(17, 17), GhostType.BLINKY); // fine
+        red_ghost.setScatterTarget(new Vector2(1, 9)); // fine
+        ghosts.add(red_ghost);
+        ghostManager.register(red_ghost);
+        ghostManager.setBlinky(red_ghost);
+        pacman.addListener(red_ghost);
+
+        
+
+        gameManager = new GameManager(pacman, ghostManager);
+        ServiceLocator.registerGameManager(gameManager);
     }
 
     @Override
@@ -98,10 +125,10 @@ public class GameScreen implements Screen {
 
         // start drawing
         batch.begin();
-        map.drawMap(batch);
+        Map.drawMap(batch);
         pacman.render(batch);
 
-        hud.render(batch, pacman.getScore(), pacman.getLives());
+        hud.render(batch, gameManager.getScore(), gameManager.getLives());
 
         // draw ghosts
         for (Ghost ghost : ghosts) {
@@ -115,17 +142,8 @@ public class GameScreen implements Screen {
 
     }
 
-    public void update(float deltaTime) {
-        // update pacman's position based on input
-        pacman.update(deltaTime);
-
-        // update ghost positions and behaviors
-        for (Ghost ghost : ghosts) {
-            ghost.updateTarget(deltaTime); // passing pacman's position for targeting
-            // move ghost along the path
-            //ghost.interpolateMove(deltaTime);
-
-        }
+    public void update(float deltaTime) {  
+        gameManager.update(deltaTime);
     }
 
     @Override
@@ -148,7 +166,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
-        map.dispose();
+        Map.dispose();
         hud.dispose();
     }
 }

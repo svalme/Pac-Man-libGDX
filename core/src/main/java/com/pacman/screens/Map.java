@@ -9,8 +9,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Map {
 
-    private TextureAtlas atlas;
-    private TextureRegion[] tileRegions;
+    private static TextureAtlas atlas;
+    private static TextureRegion[] tileRegions;
     public static int[][] map;
     public static final int TILE_SIZE = 24; // tile size
     public static int columns = 28;
@@ -23,8 +23,7 @@ public class Map {
             new Vector2( 0, -1)   // down
     };
 
-    public Map() {
-
+    public static void loadValues () {
         atlas = new TextureAtlas("map.atlas");
 
         // map each WallAtlasRegion to a TextureRegion
@@ -68,30 +67,18 @@ public class Map {
         };
 
     }
-/*
-    public static Map getInstance() {
-        if (mapInstance == null) {
-            mapInstance = new Map();
-        }
-        return mapInstance;
-    }
-*/
-    public void drawMap(SpriteBatch batch) {
 
-        // draw tiles from the tile map
-        for (int y = 0; y < map.length; y++) {
-            //System.out.printf("y: %d\n", y);
-            for (int x = 0; x < map[y].length; x++) {
-                //System.out.printf("x: %d\n", x);
+    public static void drawMap(SpriteBatch batch) {
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < columns; x++) {
                 int tileType = map[y][x]; // Get the tile type (ordinal of WallAtlasRegion)
                 TextureRegion region = tileRegions[tileType]; // Get the corresponding region
 
                 // draw the tile
-                int flippedY = map.length - 1 - y;
+                int flippedY = rows - 1 - y;
                 batch.draw(region, x * TILE_SIZE, flippedY * TILE_SIZE);
             }
         }
-
     }
 
     public static boolean collisionFree(float centerX, float centerY, float radius, Direction direction) {
@@ -112,42 +99,36 @@ public class Map {
             case RIGHT:
                 leadingX += radius;
                 break;
+            default:
+                break;
         }
 
         // convert leading edge to tile coordinates
         int tileX = (int)(leadingX / TILE_SIZE);
-        int tileY = map.length - 1 - (int)(leadingY / TILE_SIZE);
+        int tileY = rows - 1 - (int)(leadingY / TILE_SIZE);
 
-        // check bounds
-        if (tileY < 0 || tileY >= map.length || tileX < 0 || tileX >= map[0].length) {
+        if (tileY < 0 || tileY >= rows || tileX < 0 || tileX >= columns) { // check bounds
             return false; // Out of bounds = collision
         }
-/*
-        if (tileX < 0 || tileX >= map[0].length) {
-            return true; // true for wrap-around
-        }*/
 
         int tileValue = map[tileY][tileX];
-        //System.out.printf("tileY: %d, tileX: %d\n", tileY, tileX);
-        //System.out.printf("tileValue: %d\n", tileValue);
+
         // check if the tile is a wall
         return (tileValue == WallAtlasRegion.EMPTY.getValue()) ||
                (tileValue == WallAtlasRegion.PELLET_LARGE.getValue()) ||
                (tileValue == WallAtlasRegion.PELLET_SMALL.getValue());
-        //System.out.printf("collision: %b\n", collision);
-        //return collision; // hit empty wall or pellet
+
     }
 
-    public boolean isWall(int tileX, int tileY) {
-
-        if (tileY < 0 || tileY >= map.length || tileX < 0 || tileX >= map[0].length) {
+    public static boolean isWall(int tileX, int tileY) {
+        if (tileY < 0 || tileY >= rows || tileX < 0 || tileX >= columns) {
             return true;
         }
 
         int tileValue = map[tileY][tileX];
         return (tileValue != WallAtlasRegion.EMPTY.getValue()) ||
-                (tileValue != WallAtlasRegion.PELLET_LARGE.getValue()) ||
-                (tileValue != WallAtlasRegion.PELLET_SMALL.getValue());
+               (tileValue != WallAtlasRegion.PELLET_LARGE.getValue()) ||
+               (tileValue != WallAtlasRegion.PELLET_SMALL.getValue());
     }
 
     // return the x coordinate of the center of a tile
@@ -161,8 +142,22 @@ public class Map {
         return (flippedRow * TILE_SIZE) + (TILE_SIZE / 2.0f);
     }
 
-    public void dispose() {
+    public static void dispose() {
         atlas.dispose();
+    }
+
+    public static boolean isPellet(int tileX, int tileY) {
+        int tile = map[tileY][tileX];
+        return tile == WallAtlasRegion.PELLET_SMALL.getValue() || 
+               tile == WallAtlasRegion.PELLET_LARGE.getValue();
+    }
+
+    public static boolean isPowerPellet(int tileX, int tileY) {
+        return map[tileY][tileX] == WallAtlasRegion.PELLET_LARGE.getValue();
+    }
+
+    public static void removePellet(int tileX, int tileY) {
+        map[tileY][tileX] = WallAtlasRegion.EMPTY.getValue();
     }
 
 }

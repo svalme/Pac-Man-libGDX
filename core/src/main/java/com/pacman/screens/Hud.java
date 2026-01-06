@@ -20,6 +20,10 @@ public class Hud {
     public void render(SpriteBatch batch, int score, int lives) {
         font.draw(batch, "SCORE: " + score, 720, 460);
 
+        if (lives <= 0) {
+            font.draw(batch, "GAME OVER", 720, 400);
+        }
+
         for (int i = 0; i < lives; i++) {
             batch.draw(lifeIcon, 720 + i * 30, 20, 24, 24);
         }

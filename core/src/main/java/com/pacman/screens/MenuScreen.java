@@ -21,7 +21,6 @@ public class MenuScreen implements Screen {
 
     final Game game;
     private Stage stage;
-    private SpriteBatch batch;
     private OrthographicCamera camera;
     private ExtendViewport viewport;
 
@@ -33,7 +32,6 @@ public class MenuScreen implements Screen {
     @Override
     public void show() {
 
-        float tileSize = 16;
         float worldWidth = 650;  // 448
         float worldHeight = 650; // 496
 

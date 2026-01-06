@@ -6,12 +6,10 @@ import com.pacman.test.PathPrinter;
 
 public class PathManager {
     private Pathfinding pathfinding;
-    private int[][] map;
     private List<Vector2> path;
     private Vector2 lastTarget;
 
     public PathManager() {
-        this.map = ServiceLocator.getMapInstance().map;
         this.pathfinding = new Pathfinding(); // will need different paths for different ghosts
         this.lastTarget = null;
     }
@@ -21,7 +19,7 @@ public class PathManager {
         if (isPathEmpty() || !target.equals(lastTarget)) {
             lastTarget = target;
             path = pathfinding.aStarPathfinding(position, target);
-            PathPrinter.printPath(path, map);
+            //PathPrinter.printPath(path);
         }
     }
 
@@ -30,7 +28,6 @@ public class PathManager {
     }
 
     public Vector2 moveTowardsTarget(Vector2 position, float deltaTime) {
-
         if (!isPathEmpty()) {
             Vector2 nextTile = path.getFirst(); // get the next tile in the path (integer coordinates)
             Vector2 direction = nextTile.cpy().sub(position).nor(); // direction to next tile
