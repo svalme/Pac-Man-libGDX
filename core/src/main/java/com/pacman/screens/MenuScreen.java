@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.pacman.test.DebugPathfindingScreen;
+import com.pacman.test.DebugMapScreen;
 import com.badlogic.gdx.Input.Keys;
 import com.pacman.utilities.ServiceLocator;
 
@@ -100,7 +100,7 @@ public class MenuScreen implements Screen {
             @Override
             public boolean keyUp(int keycode) {
                 if (keycode == Input.Keys.F1) { // Check if the released key was F1
-                    game.setScreen(new DebugPathfindingScreen());
+                    game.setScreen(new DebugMapScreen());
                     return true; // The event was handled
                 }
                 return false; // The event was not handled
